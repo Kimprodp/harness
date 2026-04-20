@@ -86,39 +86,31 @@ harness/
 
 ---
 
-## 📊 현재 상태 (Phase 1 MVP 완성 단계)
+## 📊 현재 상태 (Phase 3 구현 완료)
 
 **상세 진행 이력은 [docs/progress.md](docs/progress.md) 참조**
 
-### 완료 (2026-04-18 기준)
+### 완료 (2026-04-20 기준)
 
 - **에이전트 3개**: `@plan-reviewer`, `@reviewer`, `@security`
-- **스킬 5개**: `idea-validation`, `product-spec`, `scope-review`, `tech-stack-decision`, `tech-spec`
-- **커맨드 7개**: `/kickoff`, `/feature-start`, `/feature-plan`, `/task`, `/code-review`, `/project-status`, `/update-docs`
-- **템플릿 6개**: `plan-template`, `context-template`, `tasks-template`, `CLAUDE.md.template`, `feature-prd-template`, `feature-tech-spec-template`
+- **스킬 6개**: `idea-validation`, `product-spec`, `scope-review`, `tech-stack-decision`, `tech-spec`, `design-slop-patterns`
+- **커맨드 12개**: `/kickoff`, `/feature-start`, `/feature-plan`, `/task`, `/code-review`, `/project-status`, `/update-docs`, `/investigate`, `/qa`, `/design-review`, `/security-audit`, `/ship`
+- **Hook**: `freshness.js` (Stop, 문서 Last Updated 자동 갱신) + `auto-skill.js` (UserPromptSubmit, 힌트 주입 + 보안 주기 체크) + `post-edit.example.js` (사용자 커스텀 슬롯)
+- **스크립트**: `_shared` 3종 (ensure-playwright/check-dev-server/version-check) + `qa/runner.js` + `design-review` 3종 + `ship` 2종
+- **템플릿 6개**: 하이브리드 구조
+- **설치**: `install.sh`, `install.ps1` (cross-platform)
 
-### 남은 작업 (Phase 1)
+### 남은 작업 (백로그)
 
-- [ ] `README.md` 작성 (GitHub용 간결 — Private이라 급하지 않음)
-- [ ] `docs/story.md` 작성 (포트폴리오용 상세 스토리 — 완성 후)
-- [ ] (선택) 미니 mock 테스트
-
-### Phase 2 (진행 예정 — 축소판, 2026-04-19 확정)
-
-- `/investigate` 커맨드 (디버깅 조사)
-- freshness Hook (Stop 이벤트 → Last Updated 자동 갱신)
-- Hook 구조 스캐폴딩 (`.claude/hooks/`, `settings.json`, post-edit 빈 슬롯)
-
-### Phase 3 (추후)
-
-- auto-skill Hook + `skill-rules.json` (커맨드 체인 밖 자동 힌트)
-- `/qa`, `/design-review`, `/ship` (gstack 포팅)
-- `/security-audit`, `install.sh`
+- [ ] `README.md` (GitHub용 간결)
+- [ ] `docs/story.md` (포트폴리오용 상세)
+- [ ] 실전 하니스 설치 + Dry Run 검증
 
 ### Phase 4 (먼 미래)
 
 - 생활 자동화 (Gmail, Calendar — Karpathy 방식)
 - Mac Mini + Telegram Bot
+- README / story.md 완성 + 공개
 
 ---
 

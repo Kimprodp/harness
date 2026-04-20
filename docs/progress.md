@@ -9,18 +9,20 @@
 
 ## 📊 현재 상태
 
-**Phase 2 진입**. Phase 1 MVP 완료 (Step 6.7까지). README/story는 완성 후 일괄 작성으로 연기.
+**Phase 3 구현 완료**. 하니스 기본 기능 세트 + 자동화 (Playwright / 보안 주기 상기 / 설치 스크립트) 완성.
 
-### Phase 2 스코프 (축소판 확정 — 2026-04-19)
-- `/investigate` 커맨드 (디버깅 조사, 프롬프트 기반)
-- freshness Hook (Stop 이벤트 → docs/ 수정 시 `Last Updated` 자동 갱신)
-- Hook 구조 스캐폴딩 (`.claude/hooks/`, `settings.json`, post-edit 빈 슬롯)
+### 핵심 산출물 (전체 누적)
+- **에이전트 3개**: `@plan-reviewer`, `@reviewer`, `@security`
+- **스킬 6개**: `idea-validation`, `product-spec`, `scope-review`, `tech-stack-decision`, `tech-spec`, `design-slop-patterns`
+- **커맨드 12개**: `/kickoff`, `/feature-start`, `/feature-plan`, `/task`, `/code-review`, `/project-status`, `/update-docs`, `/investigate`, `/qa`, `/design-review`, `/security-audit`, `/ship`
+- **Hook 2개 + 스캐폴딩**: `freshness.js` (Stop), `auto-skill.js` (UserPromptSubmit), `post-edit.example.js` (PostToolUse, 빈 슬롯)
+- **스크립트 9개**: `_shared` 3종, `qa/runner.js`, `design-review` 3종 (capture/dom-check/mockup-gen), `ship` 2종 (bump-version/changelog-gen)
+- **설치 스크립트**: `install.sh`, `install.ps1` (cross-platform)
+- **템플릿 6개**: 하이브리드 구조 (plan/context/tasks + feature prd/tech-spec)
 
-**축소 이유**: auto-skill Hook + `skill-rules.json`은 커맨드 체인과 중복 → Phase 3으로 연기. `/qa`, `/design-review`, `/ship`은 외부 의존성(Playwright 등) 때문에 Phase 3으로 분리.
-
-### 핵심 산출물
-- 에이전트 3개 / 스킬 5개 / 커맨드 7개 / 템플릿 6개
-- 전체 플로우 논리적 완결 (Dry Run 2회 통과)
+### 남은 작업 (백로그)
+- [ ] **Step 7**: `README.md` (GitHub용) + `docs/story.md` (포트폴리오용)
+- [ ] 실전 하니스 설치 + Dry Run 검증 (실제 새 프로젝트에서)
 
 ---
 
@@ -57,19 +59,24 @@
 | 2-2 | Hook 구조 스캐폴딩 — `.claude/settings.json` (Stop/PostToolUse/UserPromptSubmit 슬롯), `.claude/hooks/README.md` (이벤트 설명 + 런타임 요구), `.claude/hooks/post-edit.example.js` (린터 훅 예시, 주석 처리 기본값) | 2026-04-19 |
 | 2-3 | `.claude/hooks/freshness.js` — Stop 이벤트에서 transcript 파싱 → 이번 세션 Edit/Write 대상이 `docs/**.md` 또는 `CLAUDE.md` 면 `Last Updated` 오늘 날짜로 자동 치환. `settings.json` 에 등록. | 2026-04-19 |
 
-### Phase 3 (추후)
+### Phase 3 (실행 자동화 + 릴리스 파이프라인)
 
-- auto-skill Hook (UserPromptSubmit) + `skill-rules.json` — 커맨드 체인 밖 자유 대화 시 자동 힌트 주입
-- `/qa` (Playwright 브라우저 테스트) — gstack 포팅 (Option C: 한글 SKILL.md + gstack 코드)
-- `/design-review` (AI Slop 패턴 탐지) — gstack 포팅 (Option C)
-- `/ship` (배포 준비) — gstack 포팅 (Option B: 전면 포팅, shell 단순)
-- `/security-audit` — 독립 보안 감사 커맨드
-- `install.sh` — 새 프로젝트 설치 스크립트
+| Step | 내용 | 날짜 |
+|---|---|---|
+| 3-0 | 공용 기반 — `.claude/package.json` (playwright ^1.45) + `.claude/state/` (gitignored 런타임 상태) + `.claude/scripts/_shared/` (ensure-playwright / check-dev-server / version-check) + `.gitignore` 업데이트 | 2026-04-20 |
+| 3-1 | `/security-audit` — `@security` 독립 래퍼. 범위별 감사 (인증/결제/외부API). 완료 후 `state/security-audit.json` 에 이력 자동 기록 | 2026-04-20 |
+| 3-2 | `/qa` — Playwright 3-tier 브라우저 검증 (Quick/Standard/Exhaustive) + `runner.js` (JSON 시나리오 실행, 스크린샷/콘솔/네트워크 로그 수집) | 2026-04-20 |
+| 3-3 | `/design-review` — `design-slop-patterns` 스킬 (10대 AI Slop) + `capture.js` (다중 viewport) + `dom-check.js` (rule 기반 자동 감지) + `mockup-gen.js` (타겟 목업 생성) + Dual scoring (Design Grade + AI Slop Score) | 2026-04-20 |
+| 3-4 | `/ship` — 릴리스 파이프라인 (base merge → 품질 게이트 → plan 감사 → 버전 bump → CHANGELOG → 승인 후 커밋/푸시/PR) + `bump-version.js` (VERSION / package.json / pubspec.yaml 지원) + `changelog-gen.js` (커밋 기반) | 2026-04-20 |
+| 3-5 | `auto-skill` Hook (UserPromptSubmit) + `skill-rules.json` (10개 키워드 규칙) + `settings.json` `reminders` 섹션. 보안 감사 주기 체크 통합 (30일 기본). `task.md` 5-3-a 민감 영역 감지 + `project-status.md` 🔒 보안 감사 섹션 추가 | 2026-04-20 |
+| 3-6 | `install.sh` + `install.ps1` — cross-platform 설치 스크립트 (기존 .claude 백업 → 복사 → .gitignore 업데이트 → npm install → Playwright 선택 설치) | 2026-04-20 |
+| 3-7 | 이 문서 + `CLAUDE.md` Phase 3 완료 반영 | 2026-04-20 |
 
 ### Phase 4 (먼 미래)
 
 - 생활 자동화 (Gmail / Calendar 연동 — Karpathy 스타일 LLM 위키)
 - Mac Mini 상주 + Telegram Bot 연동
+- README / story 공개용 작성 (Step 7 잔여)
 
 ---
 
