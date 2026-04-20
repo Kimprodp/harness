@@ -43,7 +43,8 @@ description: 프로젝트 현재 상태 요약 — 3문서 + features/ + 최근 
 - `.draft/kickoff-progress.md` — 킥오프 중단 상태 있으면 감지
 - `.draft/features/*/feature-*-progress.md` — 기능 작업 중단 상태
 - `.claude/state/security-audit.json` — 보안 감사 이력 (있으면)
-- `.claude/settings.json` — `reminders.security_audit_interval_days` 기준 로드
+- `.claude/state/cleanup.json` — cleanup 이력 (있으면)
+- `.claude/settings.json` — `reminders.*_interval_days` 기준 로드
 
 ---
 
@@ -139,6 +140,22 @@ git diff --stat HEAD~5..HEAD 2>/dev/null  # 최근 5커밋 변경 규모
 - 🟢 주기 내 / 민감 변경 없음
 - 🟡 주기 초과 또는 민감 변경 1~2건 있지만 주기 내
 - 🔴 주기 초과 + 민감 변경 있음 → `/security-audit <영역>` 강력 권장
+
+## 🧹 기술 부채 상태 (cleanup)
+
+`.claude/state/cleanup.json` 있으면:
+- 마지막 cleanup: <date> (N일 전) <🟢 / 🟡 / 🔴>
+- 권장 주기: <settings.json reminders.cleanup_interval_days 또는 45>일
+- 직전 발견: stale TODO M / orphan K / large files L / empty dirs P
+- 직전 처리: 삭제 X개, tasks 등록 Y개, 남은 항목 Z개
+
+없으면:
+- "cleanup 이력 없음. `/cleanup` 으로 첫 탐지 실행 권장."
+
+<cleanup 신선도 기준>
+- 🟢 주기 내
+- 🟡 주기 초과 ~ 2배 이내 (`/cleanup` 권장)
+- 🔴 2배 초과 (강력 권장 / `/ship --strict` 에서 차단)
 
 ## 🩺 문서 신선도
 

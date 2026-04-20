@@ -135,6 +135,23 @@ UI 변경 감지됨. 다음 실행 권장:
 Y → 각 커맨드 파일 Read 해서 Phase 지시 대로 실행 후 이어서 Phase 3.
 N → 기록만 하고 Phase 3.
 
+### 2-7. cleanup 주기 체크 → /cleanup 제안 (선택)
+
+`.claude/state/cleanup.json` 의 `last_cleanup.date` 확인.
+- 없거나 `cleanup_interval_days` (기본 45일) 초과 → 🟡 **경고**:
+
+```
+🧹 마지막 cleanup: N일 전 (기준 45일)
+   /cleanup 으로 기술 부채 점검 권장.
+
+지금 실행할까요? (건너뛰려면 N)
+```
+
+Y → `.claude/commands/cleanup.md` Read 후 실행 → 완료 후 Phase 3 로 복귀.
+N → 경고만 기록.
+
+`--strict` 면 차단 (매우 오래된 경우 — 2배 이상 초과).
+
 ### 2-6. 새 의존성 / 아키텍처 변경 감지 → /decision 제안
 
 diff 에서 다음 감지 시:

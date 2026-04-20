@@ -27,10 +27,12 @@ const SECURITY_STATE_FILE = path.join(
   "state",
   "security-audit.json"
 );
+const CLEANUP_STATE_FILE = path.join(CLAUDE_DIR, "state", "cleanup.json");
 const SETTINGS_FILE = path.join(CLAUDE_DIR, "settings.json");
 
 const MAX_HINTS = 3;
-const DEFAULT_INTERVAL_DAYS = 30;
+const DEFAULT_SECURITY_INTERVAL_DAYS = 30;
+const DEFAULT_CLEANUP_INTERVAL_DAYS = 45;
 const DEFAULT_SENSITIVE_KEYWORDS = [
   "인증", "로그인", "토큰", "세션", "비밀번호", "password",
   "결제", "카드", "환불", "PG", "payment",
@@ -59,7 +61,8 @@ function getReminderSettings() {
   const s = readJson(SETTINGS_FILE, {});
   const r = s.reminders || {};
   return {
-    interval: r.security_audit_interval_days || DEFAULT_INTERVAL_DAYS,
+    securityInterval: r.security_audit_interval_days || DEFAULT_SECURITY_INTERVAL_DAYS,
+    cleanupInterval: r.cleanup_interval_days || DEFAULT_CLEANUP_INTERVAL_DAYS,
     keywords: r.security_sensitive_keywords || DEFAULT_SENSITIVE_KEYWORDS,
   };
 }
@@ -88,7 +91,7 @@ function checkSecurityAuditInterval(userText, settings) {
   const daysSince = Math.floor(
     (Date.now() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
   );
-  const interval = settings.interval;
+  const interval = settings.securityInterval;
 
   // 메시지에 민감 키워드 있으면 주기 반 경과만 돼도 알림 (조기 경고)
   const lower = userText.toLowerCase();
@@ -111,6 +114,25 @@ function checkSecurityAuditInterval(userText, settings) {
   return null;
 }
 
+function checkCleanupInterval(settings) {
+  const state = readJson(CLEANUP_STATE_FILE, null);
+  if (!state || !state.last_cleanup || !state.last_cleanup.date) return null;
+
+  const lastDate = new Date(state.last_cleanup.date);
+  const daysSince = Math.floor(
+    (Date.now() - lastDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+  const interval = settings.cleanupInterval;
+
+  if (daysSince > interval * 2) {
+    return `[cleanup 주기 2배 초과] 마지막 정리 ${daysSince}일 전 (기준 ${interval}일). \`/cleanup\` 강력 권장.`;
+  }
+  if (daysSince > interval) {
+    return `[cleanup 주기 초과] 마지막 정리 ${daysSince}일 전 (기준 ${interval}일). \`/cleanup\` 권장.`;
+  }
+  return null;
+}
+
 function main() {
   const payload = getPayload();
   const userText = payload.prompt || "";
@@ -123,9 +145,14 @@ function main() {
 
   const hints = matchRules(userText, rules);
 
-  const intervalHint = checkSecurityAuditInterval(userText, settings);
-  if (intervalHint && hints.length < MAX_HINTS) {
-    hints.push(intervalHint);
+  const securityHint = checkSecurityAuditInterval(userText, settings);
+  if (securityHint && hints.length < MAX_HINTS) {
+    hints.push(securityHint);
+  }
+
+  const cleanupHint = checkCleanupInterval(settings);
+  if (cleanupHint && hints.length < MAX_HINTS) {
+    hints.push(cleanupHint);
   }
 
   if (hints.length === 0) {
