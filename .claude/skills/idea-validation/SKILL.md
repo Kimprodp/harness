@@ -1,6 +1,7 @@
 ---
 name: idea-validation
 description: 프로덕트/기능 아이디어의 수요·타겟·최소 버전을 6가지 질문으로 검증하는 허점 발굴 인터뷰 스킬. /kickoff Phase 1 또는 /feature-start 초기에 사용한다. AI가 답을 주지 않고 "허점을 드러내는 질문"을 던진다.
+keywords: ["아이디어 검증", "허점 발굴", "수요 검증", "office hours", "가치 검증"]
 ---
 
 # Idea Validation — 허점 발굴 인터뷰

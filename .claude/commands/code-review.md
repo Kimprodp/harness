@@ -174,6 +174,7 @@ git diff는 Bash 도구로 직접 실행하라.
 | "<이슈 ID> 더 설명해" | 해당 이슈 맥락을 @reviewer 리포트에서 찾아 사용자에게 풀어서 설명. |
 | "@security 호출" / "보안도 봐줘" | Phase 5로 진입 (@security 에이전트 호출). |
 | "전부 수정해줘" | Critical/Warning 전부 순차 수정. 각 수정마다 사용자 확인 권장. |
+| **Tech Proposal 수용 결정** | 🎯 사용자가 `@reviewer` 의 Tech Proposal 중 하나를 채택하기로 하면, **`/decision` 권장** (채택 이유 + 거절 대안 + 영향을 ADR 로 실시간 기록). 결정 후 구현 작업은 `/task` 로. |
 
 ### tasks.md 추가 형식 (요청 시)
 

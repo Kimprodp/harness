@@ -30,6 +30,10 @@
       "hint": "/update-docs 로 Impl Snapshot + ADR + tasks.md 일괄 갱신 제안"
     },
     {
+      "keywords": ["결정", "선택", "채택", "고민", "라이브러리 선택", "PG 선택", "아키텍처 결정"],
+      "hint": "/decision 으로 결정 1건을 실시간 구조화 ADR 로 기록 (8개 질문 대화형)"
+    },
+    {
       "keywords": ["상태", "어디까지", "진행 상황", "status"],
       "hint": "/project-status 로 현재 Phase · 활성 기능 · 블로커 · 문서 신선도 한눈에"
     },
@@ -40,6 +44,14 @@
     {
       "keywords": ["새 기능", "기능 추가", "feature"],
       "hint": "/feature-start → /feature-plan → /task 흐름으로 PRD → tech-spec → 구현 단계별 진행"
+    },
+    {
+      "keywords": ["정리", "청소", "cleanup", "리팩터", "기술 부채", "TODO 처리"],
+      "hint": "/cleanup 으로 오래된 TODO / 참조 없는 파일 / 큰 파일 / 빈 폴더 탐지"
+    },
+    {
+      "keywords": ["시안", "디자인 방향", "여러 안", "A안 B안", "brainstorm"],
+      "hint": "/design-shotgun 으로 3~5개 다른 스타일 시안 동시 생성 + grid 비교"
     }
   ]
 }

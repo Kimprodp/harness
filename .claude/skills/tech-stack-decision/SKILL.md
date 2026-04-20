@@ -1,6 +1,7 @@
 ---
 name: tech-stack-decision
 description: 프로덕트 레벨의 기술 스택 결정 및 아키텍처 기반 설계를 돕는 스킬. 전체 plan-eng-review의 축약본. /kickoff Phase 4에서 사용한다. 세부 기능별 설계는 tech-spec 스킬.
+keywords: ["기술 스택", "tech stack", "프레임워크 선택", "언어 선택", "아키텍처 기반"]
 ---
 
 # Tech Stack Decision — 프로덕트 레벨 기술 결정
