@@ -59,6 +59,14 @@ async function main() {
         emojiDensity: 0,
         repeatingThreeColumnGrids: 0,
         lowContrastSamples: [],
+        designSystem: {
+          colors: [],
+          fonts: [],
+          fontSizes: [],
+          spacings: [],
+          radii: [],
+          shadows: [],
+        },
       };
 
       // CTA: button + a.btn + [role=button]
@@ -171,6 +179,62 @@ async function main() {
       });
       result.lowContrastSamples = lowContrast.slice(0, 10);
 
+      // ─── Design System Extraction ───
+      // 전체 페이지에서 실제 사용된 디자인 토큰 추출
+      const colors = new Set();
+      const fonts = new Set();
+      const fontSizes = new Set();
+      const spacings = new Set();
+      const radii = new Set();
+      const shadows = new Set();
+
+      document.querySelectorAll("body *").forEach((el) => {
+        if (el.offsetParent === null) return;
+        const s = getComputedStyle(el);
+
+        // colors (color, background-color, border-color 모두)
+        [s.color, s.backgroundColor, s.borderColor].forEach((c) => {
+          if (!c) return;
+          if (c === "rgba(0, 0, 0, 0)" || c === "transparent") return;
+          colors.add(c);
+        });
+
+        // fonts (첫 fallback 기준)
+        if (s.fontFamily) {
+          const primary = s.fontFamily.split(",")[0].trim().replace(/^["']|["']$/g, "");
+          if (primary) fonts.add(primary);
+        }
+
+        // font sizes (px 기준)
+        const fs = parseFloat(s.fontSize);
+        if (fs && fs > 0) fontSizes.add(Math.round(fs));
+
+        // spacings (margin/padding, 양수만)
+        ["marginTop", "marginBottom", "marginLeft", "marginRight",
+         "paddingTop", "paddingBottom", "paddingLeft", "paddingRight"].forEach((k) => {
+          const v = parseFloat(s[k]);
+          if (v && v > 0 && v < 500) spacings.add(Math.round(v));
+        });
+
+        // border radius
+        const r = parseFloat(s.borderRadius);
+        if (r && r > 0) radii.add(Math.round(r));
+
+        // box shadow
+        if (s.boxShadow && s.boxShadow !== "none") {
+          shadows.add(s.boxShadow);
+        }
+      });
+
+      result.designSystem = {
+        colors: Array.from(colors).slice(0, 30),
+        fonts: Array.from(fonts),
+        fontSizes: Array.from(fontSizes).sort((a, b) => a - b),
+        spacings: Array.from(spacings).sort((a, b) => a - b),
+        radii: Array.from(radii).sort((a, b) => a - b),
+        shadows: Array.from(shadows).slice(0, 10),
+      };
+
       return result;
     });
 
@@ -210,6 +274,31 @@ function generateHints(f) {
   if (f.lowContrastSamples.length > 0) {
     hints.push({ pattern: "#10 저대비", severity: "high", detail: `WCAG AA 미달 텍스트 ${f.lowContrastSamples.length} 건 샘플` });
   }
+
+  // ─── Design System 지표 기반 힌트 ───
+  const ds = f.designSystem || {};
+  if (Array.isArray(ds.colors) && ds.colors.length > 12) {
+    hints.push({ pattern: "팔레트 카오스", severity: "high", detail: `색상 ${ds.colors.length} 종 (권장 ≤ 8). 토큰 정리 필요.` });
+  } else if (Array.isArray(ds.colors) && ds.colors.length > 8) {
+    hints.push({ pattern: "팔레트 많음", severity: "medium", detail: `색상 ${ds.colors.length} 종 (권장 ≤ 8).` });
+  }
+  if (Array.isArray(ds.fonts) && ds.fonts.length > 3) {
+    hints.push({ pattern: "폰트 패밀리 과다", severity: "medium", detail: `폰트 ${ds.fonts.length} 종 (${ds.fonts.slice(0, 4).join(", ")}) — 권장 1~2종.` });
+  }
+  if (Array.isArray(ds.fontSizes) && ds.fontSizes.length > 12) {
+    hints.push({ pattern: "타이포 스케일 산만", severity: "medium", detail: `폰트 사이즈 ${ds.fontSizes.length} 종 — modular scale 재정리 권장.` });
+  }
+  if (Array.isArray(ds.radii) && ds.radii.length === 1 && ds.radii[0] > 0) {
+    hints.push({ pattern: "#4 균일 버블 radius", severity: "medium", detail: `모든 요소 radius ${ds.radii[0]}px 단일 — 위계 부재 가능성.` });
+  }
+  if (Array.isArray(ds.spacings) && ds.spacings.length > 15) {
+    const base = ds.spacings[0] || 4;
+    const offScale = ds.spacings.filter((v) => base > 0 && v % base !== 0).length;
+    if (offScale > ds.spacings.length / 2) {
+      hints.push({ pattern: "#9 불균일 spacing", severity: "medium", detail: `spacing ${ds.spacings.length} 종 중 과반이 base ${base}의 배수 아님.` });
+    }
+  }
+
   return hints;
 }
 

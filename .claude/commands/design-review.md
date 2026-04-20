@@ -89,10 +89,20 @@ node .claude/scripts/design-review/dom-check.js --url <URL> [--dark]
     "gradientCount": 5,
     "emojiDensity": 7,
     "repeatingThreeColumnGrids": 2,
-    "lowContrastSamples": [...]
+    "lowContrastSamples": [...],
+    "designSystem": {
+      "colors": ["rgb(10, 10, 10)", "rgb(255, 255, 255)", ...],
+      "fonts": ["Inter", "JetBrains Mono"],
+      "fontSizes": [12, 14, 16, 20, 28, 40],
+      "spacings": [4, 8, 12, 16, 24, 32, 48, 64],
+      "radii": [8],
+      "shadows": ["0 1px 3px rgba(0,0,0,0.1)", ...]
+    }
   },
   "hints": [
-    { "pattern": "#8 CTA 폭주", "severity": "high", "detail": "..." }
+    { "pattern": "#8 CTA 폭주", "severity": "high", "detail": "..." },
+    { "pattern": "팔레트 많음", "severity": "medium", "detail": "색상 10 종" },
+    { "pattern": "#4 균일 버블 radius", "severity": "medium", "detail": "모든 요소 radius 8px 단일" }
   ]
 }
 ```
@@ -139,6 +149,20 @@ Phase 3 hints 를 Vision 관찰과 교차 검증:
 ## 🎯 종합 평가
 - **Design Grade**: B (근거: typography 정돈됐으나 CTA 우선순위 불명확)
 - **AI Slop Score**: C (근거: 그라데이션 과다 + 3-column 카드)
+
+## 🎨 Design System (자동 추출)
+
+dom-check.js 의 `designSystem` 결과 기반:
+
+- **색상**: N종 (🟢 ≤8 / 🟡 9~12 / 🔴 13+) — 주요 팔레트 5~8개 예시
+- **폰트 패밀리**: N종 (🟢 1~2 / 🟡 3 / 🔴 4+) — 각 이름 명시
+- **폰트 사이즈**: N종 — 숫자 목록 (예: 12 / 14 / 16 / 20 / 28 / 40). modular scale 비율 감지 시 ✅
+- **폰트 웨이트**: N종 (기존 findings.fontWeights 와 동일 소스)
+- **Spacing**: N종 — 숫자 목록. 8의 배수 정렬 여부 명시
+- **Radius**: N종 — 단일 (⚠️ #4 Slop 가능성) vs 다양 (위계 있음)
+- **Shadow**: N종
+
+> 이 섹션은 Vision 판정과 **별개의 정량 데이터**. 10패턴 결론과 교차 검증용.
 
 ## 🔴 Critical (High 심각도)
 
