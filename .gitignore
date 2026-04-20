@@ -150,6 +150,12 @@ Thumbs.db
 # Claude Code local settings
 .claude/settings.local.json
 
+# Claude harness 런타임 (Phase 3)
+.claude/state/*
+!.claude/state/.gitkeep
+.claude/scripts/*/reports/
+.claude/scripts/*/snapshots/
+
 # Test output
 /tmp/
 /test-output/
