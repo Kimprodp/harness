@@ -160,7 +160,35 @@ AC 항목별로 간단히 체크. 방법:
 
 - 카테고리(`#### 구현`, `#### 테스트`, `#### 문서화`, `#### 리뷰 발견사항`) 전부 순회
 - 미완료 todo 1개라도 있으면 → 아카이브 제안 **하지 않음**
-- 전부 완료됐으면 → 아래 제안:
+- 전부 완료됐으면 → 5-3-a (민감 영역 판정) → 5-3-b (아카이브 제안) 순으로 진행
+
+### 5-3-a. 민감 영역 여부 판정
+
+기능명 또는 해당 기능의 `docs/features/<X>/prd.md` 본문에 다음 키워드 포함 여부 확인:
+- 인증 / 로그인 / 토큰 / 세션 / 비밀번호 / OAuth
+- 결제 / 카드 / 환불 / PG
+- API 키 / 시크릿 / 권한 / admin
+- (`.claude/settings.json` 의 `reminders.security_sensitive_keywords` 기준)
+
+**민감 영역이면**: `.claude/state/security-audit.json` 의 `sensitive_changes_since_last_audit` 배열에 기록 추가:
+```json
+{ "date": "<YYYY-MM-DD>", "feature": "<X>" }
+```
+
+그리고 아카이브 제안 직전에 **추가 권고** 출력:
+```
+🔒 기능 "<X>" 은 민감 영역입니다. 아카이브 전 보안 감사 권장:
+
+    /security-audit <X>
+
+감사 완료 후 다시 이어서 아카이브할 수 있습니다.
+지금 감사를 먼저 할까요? (Y/N)
+```
+
+Y → `.claude/commands/security-audit.md` 를 Read 해서 해당 범위로 실행. 완료 후 돌아와 5-3-b.
+N → 바로 5-3-b (단 `sensitive_changes_since_last_audit` 기록은 이미 남은 상태라 추후 /ship 또는 /project-status 에서 상기됨).
+
+### 5-3-b. 아카이브 제안
 
 ```
 🎉 기능 "<X>" 전체 완료 감지.

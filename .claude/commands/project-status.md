@@ -42,6 +42,8 @@ description: 프로젝트 현재 상태 요약 — 3문서 + features/ + 최근 
 추가 (선택):
 - `.draft/kickoff-progress.md` — 킥오프 중단 상태 있으면 감지
 - `.draft/features/*/feature-*-progress.md` — 기능 작업 중단 상태
+- `.claude/state/security-audit.json` — 보안 감사 이력 (있으면)
+- `.claude/settings.json` — `reminders.security_audit_interval_days` 기준 로드
 
 ---
 
@@ -117,6 +119,26 @@ git diff --stat HEAD~5..HEAD 2>/dev/null  # 최근 5커밋 변경 규모
 - <예: "`/feature-plan signup` 으로 기술 설계 진행">
 - <예: "tasks.md 의 리뷰 발견사항 C1 수정">
 - <예: "`/update-docs` 로 Implementation Snapshot 갱신 (마지막 업데이트 후 N일 경과)">
+
+## 🔒 보안 감사 상태
+
+`.claude/state/security-audit.json` 있으면:
+- 마지막 감사: <date> (N일 전) <🟢 / 🟡 / 🔴>
+- 권장 주기: <settings.json reminders.security_audit_interval_days 또는 30>일
+- 최근 감사 범위: <scope>
+- 최근 발견: High N / Medium M / Low K
+
+민감 기능 변경 이력 (감사 이후, `sensitive_changes_since_last_audit`):
+- <YYYY-MM-DD> - 기능 <X>
+- <YYYY-MM-DD> - 기능 <Y>
+
+없으면:
+- "아직 보안 감사 이력이 없습니다. `/security-audit` 로 첫 감사를 진행하세요."
+
+<보안 감사 신선도 기준>
+- 🟢 주기 내 / 민감 변경 없음
+- 🟡 주기 초과 또는 민감 변경 1~2건 있지만 주기 내
+- 🔴 주기 초과 + 민감 변경 있음 → `/security-audit <영역>` 강력 권장
 
 ## 🩺 문서 신선도
 
