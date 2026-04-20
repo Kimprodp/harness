@@ -1,6 +1,7 @@
 ---
 name: product-spec
 description: idea-validation으로 검증된 아이디어를 구체적 솔루션(핵심 기능·차별점·성공 지표·실패 신호)으로 구체화하는 인터뷰 스킬. /kickoff Phase 2에서 사용한다.
+keywords: ["솔루션 구체화", "product spec", "핵심 기능 정의", "차별점", "성공 지표"]
 ---
 
 # Product Spec — 솔루션 구체화

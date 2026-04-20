@@ -1,6 +1,7 @@
 ---
 name: scope-review
 description: 프로덕트/기능 계획의 범위를 대표 관점에서 검토하고 조정하는 스킬. 4개 모드(확장/선택적 확장/유지/축소) 중 하나로 결정을 유도한다. /kickoff Phase 3에서 사용한다.
+keywords: ["범위 조정", "scope review", "MVP 축소", "확장 vs 축소", "스코프"]
 ---
 
 # Scope Review — 범위 조정

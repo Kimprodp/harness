@@ -1,6 +1,7 @@
 ---
 name: design-slop-patterns
 description: AI 로 생성한 UI 가 흔히 빠지는 10대 "슬롭 패턴" 체크리스트. /design-review 가 스크린샷 분석 시 기준으로 사용.
+keywords: ["AI slop", "슬롭 패턴", "디자인 감사", "디자인 품질", "AI 생성 티", "바퍼웨이브"]
 ---
 
 # AI Slop 10대 패턴 — 디자인 감사 기준

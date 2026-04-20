@@ -1,6 +1,7 @@
 ---
 name: tech-spec
 description: 기능 단위의 상세 기술 설계 스킬. 아키텍처/품질/테스트/성능 4영역을 체계적으로 검토하며, 테스트 커버리지 다이어그램과 실패 모드 레지스트리를 산출한다. /feature-plan에서 사용한다.
+keywords: ["기술 설계", "tech spec", "아키텍처 설계", "기능 설계", "failure mode"]
 ---
 
 # Tech Spec — 기능 단위 기술 설계
