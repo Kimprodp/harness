@@ -30,6 +30,10 @@
       "hint": "/update-docs 로 Impl Snapshot + ADR + tasks.md 일괄 갱신 제안"
     },
     {
+      "keywords": ["결정", "선택", "채택", "고민", "라이브러리 선택", "PG 선택", "아키텍처 결정"],
+      "hint": "/decision 으로 결정 1건을 실시간 구조화 ADR 로 기록 (8개 질문 대화형)"
+    },
+    {
       "keywords": ["상태", "어디까지", "진행 상황", "status"],
       "hint": "/project-status 로 현재 Phase · 활성 기능 · 블로커 · 문서 신선도 한눈에"
     },

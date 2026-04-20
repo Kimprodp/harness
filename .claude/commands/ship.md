@@ -135,6 +135,30 @@ UI 변경 감지됨. 다음 실행 권장:
 Y → 각 커맨드 파일 Read 해서 Phase 지시 대로 실행 후 이어서 Phase 3.
 N → 기록만 하고 Phase 3.
 
+### 2-6. 새 의존성 / 아키텍처 변경 감지 → /decision 제안
+
+diff 에서 다음 감지 시:
+- `package.json`, `pubspec.yaml`, `pom.xml`, `Cargo.toml`, `pyproject.toml` 등의 **dependencies 추가**
+- `docker-compose.yml`, `Dockerfile` 신규 / 대폭 변경
+- 아키텍처 레벨 디렉토리 신규 (`events/`, `workers/`, `queue/`, `sagas/`)
+
+해당 결정의 **ADR 기록 여부** 확인:
+- `docs/context.md` 에서 관련 키워드(새 의존성 이름 등) 로 ADR 있는지 스캔
+- 없으면 🟡 경고:
+
+```
+⚠️ 새 의존성 / 아키텍처 변경 감지, 관련 ADR 없음:
+  - <감지 항목>
+
+**`/decision`** 으로 먼저 기록하고 오시는 것을 권장합니다.
+(채택 이유 / 거절 대안 / 영향을 남겨두지 않으면 나중에 맥락 증발)
+
+- "지금 /decision 실행" / Y → 커맨드 파일 Read 후 실행
+- "무시하고 진행" / N → 경고만 기록, Phase 3 진행
+```
+
+`--strict` + ADR 누락이면 🔴 차단.
+
 ---
 
 ## Phase 3: 계획 완성도 감사
