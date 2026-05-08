@@ -193,29 +193,55 @@ Agent(
 
 ## Phase 5: tasks.md 에 Task 분해 추가
 
+### 두 층 구조 원칙
+
+- **tasks.md** = 자연어 인덱스 (사람이 읽는, "지금 어느 단계 / 무엇 하는 중") — 단계명만
+- **tech-spec.md** = 코드 수준 디테일 (AC, 함수 시그니처, 엣지 케이스) — 세션이 읽는 SoT
+
+같은 정보를 양쪽에 중복 기록하지 말 것. tasks.md 에는 자연어 단계만, 코드 수준 AC는 tech-spec 에 있다고 참조.
+
 ### 실행
 1. `tech-spec.md` 의 "Parallelization Strategy" + "Section 3 테스트 계획" 을 기반으로 구체 Task 도출.
-2. 각 Task에 **Effort (S/M/L/XL) + AC (Acceptance Criteria)** 부여.
-3. `docs/tasks.md` 의 Phase 1 아래 해당 기능 서브섹션에 추가:
+2. 각 Task 에 **자연어 단계명 + Effort (S/M/L/XL)** 부여. 코드 수준 AC 는 tech-spec.md 가 SoT.
+3. `docs/tasks.md` 의 Phase 1 아래 해당 기능 서브섹션에 추가.
 
-### 형식
+### 형식 (자연어 인덱스 — 권장)
 
 ```markdown
-### 기능: <기능명>
+### 기능: <기능명> (진행 중)
 
-#### 구현
+> 단계: 1/N — <첫 번째 자연어 단계명>
+> 무엇: <비개발자도 이해할 수 있는 한 줄 설명>
+> 다음: <다음 단계 자연어>
+
+PRD: features/<기능명>/prd.md
+설계: features/<기능명>/tech-spec.md  ← 코드 수준 AC, 시그니처는 여기
+
+#### 단계
+- [ ] 1. <자연어 단계명> [Effort]
+- [ ] 2. <자연어 단계명> [Effort]
+- [ ] 3. <자연어 단계명> [Effort]
+- [ ] 4. 테스트 작성 [Effort]
+- [ ] 5. 문서 갱신 [S]
+```
+
+### 안티패턴 (피할 것)
+
+```markdown
+❌ T1: <작업 제목>   ← T 접두사 금지. "1." 또는 자연어 단계명만
+❌ Phase 1.1, 1.2   ← 중첩 Phase 코드 금지
+❌ AC: validate_round_n_test() 가 round_count >= 3 일 때 ...   ← 코드 식별자/함수명 직접 노출 X. tech-spec.md 에서만.
+❌ AC: <긴 측정 기준 1~5개 모두 나열>   ← tasks.md 는 인덱스. 디테일은 tech-spec.md 의 Section 3.
+```
+
+### 작은 작업 (features/ 디렉토리 안 만드는 경우)
+
+기능 단위가 아닌 작은 보조 작업은 기존 todo 형식 사용 가능:
+
+```markdown
 - [ ] **<작업 제목>** [Effort]
   - AC: <측정 가능한 완료 기준>
-  - AC: <...>
-  - 의존: <선행 작업 / 외부 서비스> (있으면)
-
-#### 테스트
-- [ ] **<테스트 작성 작업>** [Effort]
-  - AC: <tech-spec의 테스트 계획에 적힌 커버리지 달성>
-
-#### 문서
-- [ ] **<문서 갱신 작업>** [S]
-  - AC: context.md ADR 업데이트 / 회고 노트 등
+  - 의존: <선행 작업> (있으면)
 ```
 
 ### 산출
