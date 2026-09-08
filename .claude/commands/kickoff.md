@@ -134,6 +134,10 @@ Phase 3 으로 간다.
 
 "문서에 없음" 으로 표시된 항목을 사용자에게 묻는다. 한 번에 나열해서 묻고, 답하지 않은 것은 "미정" 으로 남긴다.
 
+**기술과 시스템 구조는 여기서 묻지 않는다.** 기획 문서에 기술 얘기가 없는 것은 정상이다. 언어와 저장소와 배포 방식은 Phase 3 이 요구를 모은 뒤 근거를 갖고 정한다. 여기서 먼저 물으면 같은 것을 두 번 묻게 되고, 근거 없이 고른 답이 Phase 3 의 판단을 묶는다.
+
+기획 문서에 **이미 정해진** 기술 제약이 있으면(사내 표준 스택, 반드시 써야 하는 시스템) 그것만 기록해 Phase 3 에 전달한다.
+
 **기획 내용 자체를 다시 검증하지 않는다.** 이미 결론이 난 것이라 여기서 뒤집으면 원본 기획과 어긋난다. 다만 명백한 모순(범위와 일정이 맞지 않는 등)이 보이면 지적만 하고 판단은 사용자에게 맡긴다.
 
 ### 2-4. 정리 결과 확인
@@ -146,11 +150,13 @@ Phase 3 으로 간다.
 
 ## Phase 3: 시스템 설계 — 두 경로 합류
 
-`.claude/commands/architecture.md` 를 Read 로 로드하고 그 지시대로 수행한다. 첫 설계이므로 진단 단계는 건너뛰고 Step 1 부터 시작한다.
+`.claude/commands/architecture.md` 를 Read 로 로드하고 그 지시대로 수행한다. **내부 호출이므로 Phase 3(문서 초안 생성)까지만 수행하고 Phase 4 검토와 Phase 5 확정은 건너뛴다.** 검토와 확정은 아래 Phase 4 가 자기 문서와 함께 한 번에 처리한다.
 
-앞 Phase 의 draft 를 맥락으로 전달한다. Step 1 요구 수집에서 이미 답이 나온 항목은 다시 묻지 않고 확인만 받는다.
+첫 설계이므로 진단 단계도 건너뛰고 Step 1 부터 시작한다.
 
-산출물은 `.draft/architecture/` 에 쌓이고 Phase 4 에서 함께 확정한다.
+앞 Phase 의 draft 를 맥락으로 전달한다. Step 1 요구 수집에서 이미 답이 나온 항목은 다시 묻지 않고 확인만 받는다. 경로 B 라면 기획 문서에서 이미 뽑은 대상 사용자, 범위, 일정이 여기 해당한다.
+
+산출물은 `.draft/architecture/final/` 에 쌓인다.
 
 ---
 
@@ -228,10 +234,15 @@ Agent(
 
 ### 4-5. 확정
 
-1. `.draft/final/*` → `docs/` 와 프로젝트 루트로 이동
-2. `.draft/architecture/final/*` → `docs/`
-3. `kickoff-progress.md` 에 완료 스탬프
-4. `.draft/` 중간 산출물은 지우지 않고 남긴다
+1. `.draft/final/plan.md`, `milestones.md`, `context.md`, `tasks.md` → `docs/`
+2. `.draft/final/CLAUDE.md` → 프로젝트 루트
+3. `.draft/architecture/final/architecture.md`, `data-model.md` → `docs/`
+4. `.draft/architecture/final/context-adr.md` 의 내용을 `docs/context.md` 의 ADR 절 끝에 **붙여 넣는다.** 파일째 옮기지 않는다
+5. `.draft/architecture/final/claude-rules.md` 의 내용을 `CLAUDE.md` 의 프로젝트 고유 규칙 절에 **반영한다.** 파일째 옮기지 않는다
+6. `kickoff-progress.md` 에 완료 스탬프
+7. `.draft/` 중간 산출물은 지우지 않고 남긴다
+
+4번과 5번은 조각이다. `docs/` 에 그대로 두면 어디에도 속하지 않는 파일이 남는다.
 
 ```
 ✅ Kickoff 완료
@@ -272,5 +283,5 @@ Agent(
 | 경로 B 문서에 내용이 너무 적음 | 뽑을 수 있는 것만 정리하고 나머지는 Phase 2-3 에서 질문 |
 | 경로 B 문서끼리 서로 모순 | 모순 지점을 제시하고 어느 쪽이 맞는지 확인 |
 | Phase 답변이 모호함 | 두 번 파고들고 그래도 모호하면 "불명확" 플래그를 달고 진행 |
-| 도중에 방향이 크게 바뀜 | 해당 Phase 부터 재실행 제안 |
+| 도중에 방향이 크게 바뀜 | 해당 Phase 부터 재실행 제안 (이 커맨드의 Phase 를 말한다) |
 | 템플릿 경로를 못 찾음 | `.claude/templates/` 확인. 없으면 중단하고 설치 확인 요청 |

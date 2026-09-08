@@ -33,12 +33,25 @@ argument-hint: [목표 단계 — poc / mvp / product. 생략 시 문서에서 �
 
 ## Phase 0: 선행 체크
 
+### 0-1. 호출 맥락 확인
+
+이 커맨드는 두 가지 방식으로 실행된다.
+
+| 방식 | 어떻게 아나 | 어디까지 수행하나 |
+|---|---|---|
+| **단독 실행** | 사용자가 `/architecture` 를 직접 입력 | Phase 0 부터 5 까지 전부 |
+| **`/kickoff` 내부 호출** | `/kickoff` 이 Phase 3 에서 이 파일을 로드했다 | **Phase 3(문서 초안 생성)까지만.** Phase 4 검토와 Phase 5 확정은 건너뛴다 |
+
+내부 호출일 때 검토와 확정을 하지 않는 이유는 `/kickoff` 이 자기 문서와 함께 한 번에 검토하고 확정하기 때문이다. 여기서 먼저 해버리면 검토가 두 번 돌고 파일을 두 번 옮기게 된다.
+
+### 0-2. 환경 확인
+
 1. 프로젝트 루트 확인.
-2. `docs/plan.md` 존재 확인. 없으면 **"`/kickoff` 이 먼저 필요합니다"** 안내 후 중단. 단 `/kickoff` 이 이 커맨드를 호출한 경우는 예외.
+2. `docs/plan.md` 존재 확인. 없으면 **"`/kickoff` 이 먼저 필요합니다"** 안내 후 중단. **내부 호출이면 이 검사를 건너뛴다.** `plan.md` 는 아직 만들어지기 전이다.
 3. `docs/architecture.md` 존재 여부로 경로를 가른다.
    - **없음** → Phase 2 (첫 설계)
    - **있음** → Phase 1 (진단부터)
-4. 목표 단계 확정. 인자로 받았으면 그것을 쓰고, 없으면 `docs/architecture.md` 나 `docs/milestones.md` 에서 읽는다. 그래도 불명확하면 사용자에게 한 번 묻는다.
+4. 목표 단계 확정. 인자로 받았으면 그것을 쓴다. 없으면 `docs/architecture.md` 나 `docs/milestones.md` 에서 읽는다. 둘 다 없으면(첫 설계) 기획 문서의 일정과 범위로 추정해 제시하고 확인받는다. 추정할 근거도 없으면 묻는다.
 5. `.draft/architecture/` 생성.
 
 ---
@@ -128,7 +141,9 @@ ADR 태그는 `[architecture]` 를 기본으로 하고 내용에 따라 `[data]`
 
 ---
 
-## Phase 4: @plan-reviewer 검토
+## Phase 4: @plan-reviewer 검토 — 단독 실행일 때만
+
+> `/kickoff` 내부 호출이면 여기서 멈춘다. 초안을 `.draft/architecture/final/` 에 둔 채로 `/kickoff` Phase 4 로 돌아간다.
 
 ```
 Agent(
@@ -159,7 +174,7 @@ Agent(
 
 ---
 
-## Phase 5: 확정
+## Phase 5: 확정 — 단독 실행일 때만
 
 ### 5-1. 컨펌 루프
 

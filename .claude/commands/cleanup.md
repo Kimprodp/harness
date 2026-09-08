@@ -142,7 +142,7 @@ node .claude/scripts/cleanup/detect.js \
 | 요청 | 메인 AI 행동 |
 |---|---|
 | 파일 삭제 확정 | 해당 파일 최종 확인 후 `fs.unlinkSync` (Edit 대신 rm). 커밋은 사용자가 별도 수행 |
-| tasks.md 추가 | 해당 Phase 공통 섹션 아래 `#### 정리 (YYYY-MM-DD)` 에 todo 추가 |
+| tasks.md 추가 | 현재 마일스톤의 공통 / 인프라 섹션 아래 `#### 정리 (YYYY-MM-DD)` 에 항목 추가 |
 | TODO 주석 삭제 | 해당 라인을 Edit 로 제거 (주의: 라인 번호 재확인 필수) |
 | 리팩터 task 추가 | "파일 쪼개기: Dashboard.tsx → N개로" 식 todo |
 
