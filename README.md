@@ -301,7 +301,6 @@ cd .claude && npx playwright install chromium
 | 문서 | 내용 |
 |---|---|
 | [docs/spec.md](docs/spec.md) | 하네스 구조의 정본. 프로세스, 문서 경계, 각 요소의 역할, 설계 원칙 |
-| [docs/progress.md](docs/progress.md) | 진행 이력과 결정 로그 |
 | [CLAUDE.md](CLAUDE.md) | 하네스 자체를 개발할 때의 프로젝트 맥락 |
 
 ---
