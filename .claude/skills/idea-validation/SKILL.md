@@ -6,7 +6,7 @@ keywords: ["아이디어 검증", "허점 발굴", "수요 검증", "office hour
 
 # Idea Validation — 허점 발굴 인터뷰
 
-> **원본**: [gstack/office-hours](https://github.com/garrytan/gstack) (MIT) — 한국어 포팅 + 3문서 연결
+> **원본**: [gstack/office-hours](https://github.com/garrytan/gstack) (MIT) — 한국어 포팅
 
 ## 역할
 
