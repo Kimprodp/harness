@@ -43,12 +43,23 @@ async function main() {
     process.exit(2);
   }
 
-  ensurePlaywright();
-
   const scenarioPath = path.isAbsolute(args.scenario)
     ? args.scenario
     : path.resolve(process.cwd(), args.scenario);
   const scenario = JSON.parse(fs.readFileSync(scenarioPath, "utf-8"));
+
+  // API 시나리오는 브라우저를 띄우지 않고 api-runner 로 넘긴다
+  if (scenario.type === "api") {
+    const { spawnSync } = require("child_process");
+    const r = spawnSync(
+      process.execPath,
+      [path.join(QA_DIR, "api-runner.js"), "--scenario", scenarioPath],
+      { stdio: "inherit" }
+    );
+    process.exit(r.status === null ? 4 : r.status);
+  }
+
+  ensurePlaywright();
 
   const rootUrl = new URL(scenario.url).origin;
   const serverCheck = await checkDevServer(rootUrl);

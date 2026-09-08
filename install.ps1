@@ -1,4 +1,4 @@
-# install.ps1 — 하니스를 새 프로젝트에 설치 (PowerShell)
+﻿# install.ps1 — 하니스를 새 프로젝트에 설치 (PowerShell)
 #
 # 사용법:
 #   cd <target-project>

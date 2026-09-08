@@ -1,8 +1,8 @@
 ---
-description: 3문서 갱신 — context.md Implementation Snapshot 중심, tasks.md 체크오프, 필요 시 ADR 추가
+description: 문서 일괄 갱신 — 구현 스냅샷, ADR 추가, tasks 체크오프, 마일스톤 반영
 ---
 
-# /update-docs — 3문서 갱신
+# /update-docs — 문서 일괄 갱신
 
 당신(메인 AI)은 최근 작업 내용을 바탕으로 `docs/context.md`, `docs/tasks.md`, (필요 시) `docs/plan.md` 를 갱신한다.
 
@@ -14,11 +14,13 @@ description: 3문서 갱신 — context.md Implementation Snapshot 중심, tasks
 
 ---
 
-## 전제 조건
+## 이 커맨드만의 규칙
 
-- `docs/context.md`, `docs/tasks.md` 존재 필수 (없으면 `/kickoff` 안내 후 중단).
-- **사용자 승인 전에 파일 수정 금지**. 제안 → 확인 → 반영 순서.
-- 제안은 구체적으로 (어느 섹션 / 어떤 내용 / 왜).
+> 말투, 승인 절차 같은 공통 규칙은 `CLAUDE.md` 의 공통 작업 규칙을 따른다.
+
+1. **제안은 구체적으로.** 어느 문서의 어느 절을, 지금 무엇이 적혀 있고, 무엇으로 바꿀지 셋을 함께 준다.
+2. **기존 ADR 을 덮어쓰지 않는다.** 추가만 한다.
+3. **회고형 일괄 갱신용이다.** 결정 한 건을 즉시 남기려면 `/decision` 이 낫다.
 
 ---
 
@@ -35,15 +37,15 @@ description: 3문서 갱신 — context.md Implementation Snapshot 중심, tasks
 
 ### 소스 1: git 활동
 
-`docs/context.md` 의 **Last Updated** 값을 기준 날짜로 사용:
+`docs/context.md` 가 마지막으로 커밋된 시점을 기준으로 삼는다. 문서에 적힌 날짜 필드가 아니라 git 이 아는 실제 시각이다.
 
 ```bash
-# Last Updated가 "2026-04-18" 이면
-git log --oneline --since="2026-04-18"
-git diff --stat --since="2026-04-18" HEAD
+SINCE=$(git log -1 --format=%cd --date=short -- docs/context.md)
+git log --oneline --since="$SINCE"
+git diff --stat HEAD~$(git rev-list --count --since="$SINCE" HEAD)..HEAD
 ```
 
-Last Updated가 없거나 파싱 실패 시: 최근 10커밋 (`git log --oneline -10`) 로 대체.
+문서가 한 번도 커밋되지 않았으면 최근 10커밋(`git log --oneline -10`)으로 대체한다.
 최근 수정 파일 목록 / 커밋 메시지에서 주요 변경 식별.
 
 ### 소스 2: 현재 대화 맥락
@@ -67,7 +69,6 @@ Last Updated가 없거나 파싱 실패 시: 최근 10커밋 (`git log --oneline
 현재 `## 현재 구현 스냅샷` 섹션을 **최신 정보로 전면 교체**.
 
 제안 내용:
-- **마지막 업데이트 시점**: <현재 YYYY-MM-DD HH:MM>
 - **현재 구현 중인 것**: <대화 맥락 + git 활동 기반>
 - **최근 세션에서 내린 주요 결정**: <있으면 목록>
 - **최근 수정된 주요 파일**:
@@ -120,6 +121,10 @@ Last Updated가 없거나 파싱 실패 시: 최근 10커밋 (`git log --oneline
 - **기능 전체 완료 감지** 시: `tasks-template.md` 의 "완료된 기능" 섹션 표준 압축 패턴으로 이동 제안 (한 줄 요약 + 단계 + 커밋 해시 + 코멘트)
 - **새로 생긴 작업**: 대화 중 나온 할 일, 리뷰 이슈 등 추가 제안
 - **블로커 업데이트**
+
+### 2-C2. milestones.md — 기능 상태 반영
+
+완료된 기능이 있으면 `docs/milestones.md` 의 포함 기능 표에서 상태를 갱신한다. 마일스톤 전체가 끝났으면 완료 판정 기준을 충족했는지 확인하고 실제 완료일을 적을지 묻는다.
 
 ### 2-D. plan.md — 보통 X, 필요 시만
 
@@ -179,7 +184,7 @@ Last Updated가 없거나 파싱 실패 시: 최근 10커밋 (`git log --oneline
 - **"1, 3만"** 또는 선택적**: 선택된 것만 반영
 - **"수정 후 반영"**: 사용자 수정 요청 반영 후 반영
 
-반영 시 반드시 **파일의 `Last Updated` 필드 갱신**.
+반영한 내용은 커밋으로 남긴다. 문서에 날짜 필드를 손으로 적지 않는다. 신선도는 git 이 판정한다.
 
 ---
 
@@ -199,24 +204,13 @@ Last Updated가 없거나 파싱 실패 시: 최근 10커밋 (`git log --oneline
 
 ---
 
-## 핵심 원칙
-
-1. **제안 → 승인 → 반영** 순서 엄수. 독단 수정 금지.
-2. **Before/After 명확**: 무엇이 어떻게 바뀌는지 보여주기.
-3. **Last Updated 갱신**: 파일 수정 시 반드시 해당 필드 최신화.
-4. **ADR 태그 필수**: 새 ADR 추가 시 `[product]/[feature: X]/[tech]/...` 태그 포함.
-5. **완료 처리 원칙**: 개별 todo 는 `[x]` 만, 원래 위치 유지. 기능 전체 완료 감지 시에만 표준 압축 패턴으로 이동 (`tasks-template.md` 참조).
-6. **디테일 압축**: ADR/Snapshot 에 시도 단계 스토리 / 측정 raw / 코드 경로 나열 금지. 디테일은 커밋·코드·측정 로그에.
-6. **회귀 방지**: Last Updated 이전 내용을 덮지 말 것. 추가·수정만.
-
----
 
 ## 실패 시나리오
 
 | 상황 | 대응 |
 |---|---|
 | context.md/tasks.md 없음 | `/kickoff` 먼저 필요 안내 |
-| 제안할 변경 없음 | "갱신이 불필요합니다. 3문서는 최신입니다." 보고 |
+| 제안할 변경 없음 | "문서가 최신입니다. 갱신할 것이 없습니다." 보고 |
 | 대화 맥락 부족 | 사용자에게 "이번 세션에 주요 변경 있었나요?" 질문 |
 | 충돌하는 결정 감지 | "기존 ADR과 충돌: <기존 결정>. 폐기/수정/공존 중 선택" 요청 |
 | git log 접근 불가 | 대화 맥락만으로 제안 |

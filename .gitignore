@@ -155,7 +155,11 @@ Thumbs.db
 !.claude/state/.gitkeep
 .claude/scripts/*/reports/
 .claude/scripts/*/snapshots/
+.claude/scripts/*/mockups/
 
 # Test output
 /tmp/
 /test-output/
+
+# 로컬 전용 — 하네스 개발 진행 기록 (공개 저장소에 올리지 않음)
+docs/progress.md

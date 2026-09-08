@@ -3,6 +3,8 @@
 이 폴더는 Claude Code 의 **Hook 이벤트** 에 등록되는 스크립트들을 담는다.
 Hook 이란 Claude Code 내부의 특정 이벤트(사용자 프롬프트 제출, 도구 실행 후, 응답 종료 등) 시점에 **자동으로 실행되는 셸 명령** 이다.
 
+> 문서 신선도를 자동 갱신하던 `freshness.js` 는 제거됐다. `Last Updated` 필드를 훅이 고치면 `/project-status` 의 신선도 판정이 그 값을 근거로 삼는데, 내용이 안 바뀌어도 날짜가 새로 찍혀 경고가 뜨지 않았다. 지금은 git 커밋 시각으로 판정한다.
+
 등록은 프로젝트 루트의 `.claude/settings.json` 에서 한다.
 
 ---
@@ -11,10 +13,10 @@ Hook 이란 Claude Code 내부의 특정 이벤트(사용자 프롬프트 제출
 
 | 이벤트 | 발동 시점 | 하니스 기본 활용 |
 |---|---|---|
-| `UserPromptSubmit` | 사용자가 메시지 보낸 직후 | (Phase 3 예정: auto-skill) |
+| `UserPromptSubmit` | 사용자가 메시지 보낸 직후 | **auto-skill** (스킬 힌트 주입 + 보안·cleanup 주기 상기) |
 | `PreToolUse` | 도구 실행 직전 | (미사용) |
 | `PostToolUse` | 도구 실행 직후 | **post-edit 슬롯** (사용자 프로젝트별 린터/포맷) |
-| `Stop` | AI 응답 종료 시 | **freshness** (docs/ 수정 시 Last Updated 자동 갱신) |
+| `Stop` | AI 응답 종료 시 | (미사용) |
 | `SubagentStop` | 서브에이전트 종료 시 | (미사용) |
 | `Notification` | 사용자 확인 필요 알림 | (미사용) |
 | `PreCompact` | 대화 압축 직전 | (향후 활용 여지) |
@@ -25,7 +27,7 @@ Hook 이란 Claude Code 내부의 특정 이벤트(사용자 프롬프트 제출
 
 | 파일 | 이벤트 | 역할 | 상태 |
 |---|---|---|---|
-| `freshness.js` | `Stop` | 이번 응답에서 수정된 `docs/*.md`, `CLAUDE.md` 의 `Last Updated` 를 오늘 날짜로 자동 갱신 | Phase 2-3 에서 활성화 |
+| `auto-skill.js` | `UserPromptSubmit` | `skill-rules.json` 키워드 매칭 + 스킬 frontmatter 자동 스캔으로 힌트 주입. 보안·cleanup 주기 초과 시 경고 | 등록됨 |
 | `post-edit.example.js` | `PostToolUse` | (예시) Edit/Write 후 원하는 린터/포맷 실행. **실사용 시 복사해서 프로젝트에 맞게 커스터마이즈** | 예시 파일 (미등록) |
 
 ---
@@ -34,8 +36,8 @@ Hook 이란 Claude Code 내부의 특정 이벤트(사용자 프롬프트 제출
 
 하니스를 새 프로젝트에 복사한 뒤, 해당 프로젝트에서:
 
-### 1. 기본 Hook (freshness) 그대로 사용
-추가 설정 불필요. `settings.json` 에 이미 등록됨.
+### 1. 기본 Hook (auto-skill) 그대로 사용
+추가 설정 불필요. `settings.json` 에 이미 등록돼 있다. 키워드를 조정하려면 `.claude/skill-rules.json` 을 고친다.
 
 ### 2. post-edit 커스터마이즈 (선택)
 

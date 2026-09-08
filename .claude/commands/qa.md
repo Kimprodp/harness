@@ -1,87 +1,141 @@
 ---
-description: Playwright 로 실제 브라우저에서 기능 동작 검증. 3-tier 모드 (quick/standard/exhaustive).
-argument-hint: [자연어 시나리오 설명 — 예: "로그인 플로우" / --quick, --exhaustive, --headed 옵션]
+description: 동작 검증 — 브라우저 모드와 API 모드. 시나리오를 만들어 실행하고 결과를 리포트
+argument-hint: [자연어 시나리오 설명 — 예: "로그인 플로우" / --api, --quick, --exhaustive, --headed]
 ---
 
-# /qa — 브라우저 동작 검증
+# /qa — 동작 검증
 
-당신(메인 AI)은 사용자의 요청에 따라 Playwright 로 실제 브라우저에서 기능을 검증한다.
-시나리오 JSON 을 생성·저장·실행하고, 결과 리포트를 제시한 후 자연 대화로 후속 조치한다.
+당신(메인 AI)은 기능이 실제로 동작하는지 검증한다. 시나리오 JSON 을 만들고, 승인을 받고, 실행하고, 결과를 제시한다.
 
-**`/code-review`, `/investigate` 와의 차이**:
-- `/code-review`: 코드 정적 품질
-- `/investigate`: 버그 원인 조사 (실행 X)
-- `/qa`: **실제 브라우저로 동작 검증** (동적)
+**두 모드가 있다.**
+
+| 모드 | 대상 | 도구 |
+|---|---|---|
+| 브라우저 | 화면이 있는 기능 | Playwright |
+| API | 백엔드만 있는 기능 | Node 내장 fetch. Playwright 불필요 |
+
+**다른 커맨드와의 차이**: `/code-review` 는 코드를 읽고, `/investigate` 는 원인을 찾고, `/qa` 는 **실제로 실행해서** 동작을 확인한다.
 
 ---
 
-## 전제 조건
+## 이 커맨드만의 규칙
 
-- 프로젝트 루트에서 실행.
-- dev server 가 **떠있어야 한다** (http://localhost:3000 등). 없으면 사용자에게 먼저 켜달라고 안내.
-- Playwright 미설치면 **자동 설치** (runner 가 알아서 처리).
-- 이 커맨드는 **코드 수정하지 않는다**. 실패 시 `/investigate` 로 제안.
+> 말투, 승인 절차 같은 공통 규칙은 `CLAUDE.md` 의 공통 작업 규칙을 따른다.
+
+1. **승인 없이 실행하지 않는다.** 시나리오를 보여주고 확인받은 뒤에 돌린다.
+2. **코드를 수정하지 않는다.** 실패하면 `/investigate` 로 넘긴다.
+3. **시나리오를 저장한다.** 일회성 실행도 남긴다. 회귀 검증의 기반이 된다.
+4. **실패를 뭉뚱그리지 않는다.** 통과처럼 보이게 쓰지 않는다.
+5. **경고를 무시하지 않는다.** 스텝이 통과해도 콘솔 오류나 느린 응답이 있으면 요약에 적는다.
 
 ---
 
 ## Phase 0: 선행 체크
 
-1. `.claude/scripts/qa/runner.js` 존재 확인.
-2. `.claude/package.json` 존재 확인.
-3. dev server URL 결정:
-   - 사용자 인자에 URL 있으면 사용.
-   - 없으면 기본값 `http://localhost:3000` 사용. 다른 포트일 가능성이 높으면 사용자 확인.
-4. **Playwright 자동 설치 동의 확인** (첫 실행 시):
-   ```
-   Playwright 가 아직 설치되지 않았습니다.
-   자동 설치할까요? (~1~2분, 약 320MB)
-   
-   - Y/네 → 자동 설치 후 진행
-   - N → 중단
-   ```
-   * 설치 완료 마커: `.claude/state/tools-installed.json` 에 기록됨.
+1. `.claude/scripts/qa/runner.js` 와 `api-runner.js` 존재 확인.
+2. 모드 결정.
+   - 인자에 `--api` 가 있으면 API 모드
+   - 기능의 `docs/features/<X>/` 에 `screens.md` 가 없으면 API 모드로 추정
+   - 그 외 브라우저 모드
+   - 추정 결과를 사용자에게 한 줄로 확인한다
+3. 서버 주소 결정. 인자에 있으면 쓰고, 없으면 브라우저는 `http://localhost:3000`, API 는 `http://localhost:8080` 을 기본으로 제시하고 확인받는다.
+4. 브라우저 모드에서 Playwright 가 없으면 설치 동의를 받는다. 약 320MB 를 내려받는다. **API 모드는 설치가 필요 없다.**
 
 ---
 
-## Phase 1: 검증 대상 수집
+## Phase 1: 시나리오 수집
 
-### 1-1. 모드 결정
+### 1-1. 모드별 세부 설정
 
-| 인자 | 모드 | 설명 |
-|---|---|---|
-| `--quick` | **Quick** | 30초 스모크 — 홈 + 상위 5 네비 + 콘솔 에러 감지 |
-| (기본) | **Standard** | 핵심 플로우 1~2개 + 콘솔/네트워크 체크 |
-| `--exhaustive` | **Exhaustive** | 모든 플로우 + 다수 상호작용 상태 + 반응형 |
+**브라우저 모드**
 
-인자에 옵션 지정 있으면 해당 모드, 없으면 Standard.
+| 인자 | 범위 |
+|---|---|
+| `--quick` | 30초 스모크. 홈과 주요 경로 이동, 콘솔 오류 감지 |
+| (기본) | 핵심 플로우 하나에서 둘. 콘솔과 네트워크 확인 |
+| `--exhaustive` | 모든 플로우, 상호작용 상태, 반응형 |
 
-### 1-2. 시나리오 요구사항 수집
+**API 모드**는 검증할 엔드포인트 묶음으로 범위를 정한다.
 
-사용자 인자 + 대화로 수집:
+### 1-2. 필요한 정보
 
-- **목적**: 무엇을 확인하고 싶은가? (예: "로그인 플로우", "결제 완료", "랜딩 반응형")
-- **URL/경로**: dev server 주소 + 시작 페이지
-- **전제 조건**: 로그인 필요? 시드 데이터?
-- **성공 기준**: 뭐가 되면 통과인가? (리다이렉트 성공, 특정 텍스트 표시, 콘솔 에러 없음)
+- 무엇을 확인하려는가
+- 시작 지점 (경로 또는 엔드포인트)
+- 전제 조건 (로그인 필요 여부, 시드 데이터)
+- 무엇이 되면 통과인가
 
-**예시**:
-```
-알려주세요:
-1. URL (기본: http://localhost:3000)
-2. 검증 목적 (인자 "로그인 플로우" 반영)
-3. 테스트 계정 (로그인 필요 시)
-4. 성공 기준 (어디 도달하면 통과?)
-```
+`docs/features/<X>/functional-spec.md` 가 있으면 먼저 읽는다. 동작 규칙과 예외 상황이 거기 있으므로 시나리오를 사용자에게 묻지 않고 초안을 만들 수 있다. **특히 경계값과 예외 상황 표를 시나리오로 옮긴다.** 정상 경로만 검증하면 의미가 절반이다.
 
 ---
 
-## Phase 2: 시나리오 생성 + 사용자 승인
+## Phase 2: 시나리오 작성
 
-### 2-1. 시나리오 JSON 생성
+### 2-1. API 모드
 
-Phase 1 정보로 `.claude/scripts/qa/scenarios/<name>.json` 작성:
+`.claude/scripts/qa/scenarios/<이름>.json` 에 저장한다.
 
-**Standard 예시** (로그인):
+```json
+{
+  "name": "auth-flow",
+  "type": "api",
+  "baseUrl": "http://localhost:8080",
+  "headers": { "Content-Type": "application/json" },
+  "vars": { "email": "test@example.com" },
+  "steps": [
+    {
+      "action": "request",
+      "name": "로그인",
+      "method": "POST",
+      "path": "/api/login",
+      "body": { "email": "{{email}}", "password": "pw1234" },
+      "expect": { "status": 200, "jsonHas": ["token"] },
+      "capture": { "token": "$.token" }
+    },
+    {
+      "action": "request",
+      "name": "토큰으로 내 정보 조회",
+      "method": "GET",
+      "path": "/api/me",
+      "headers": { "Authorization": "Bearer {{token}}" },
+      "expect": { "status": 200, "jsonEquals": { "email": "{{email}}" }, "maxMs": 1000 }
+    },
+    {
+      "action": "request",
+      "name": "토큰 없이 접근하면 거부",
+      "method": "GET",
+      "path": "/api/me",
+      "expect": { "status": 401 }
+    }
+  ]
+}
+```
+
+**`type: "api"` 가 필수다.** 이 값이 있으면 브라우저를 띄우지 않는다.
+
+**action**
+
+| action | 필드 |
+|---|---|
+| `request` | `method`, `path` 또는 `url`, `headers`, `body`, `expect`, `capture`, `timeout`, `name` |
+| `wait` | `ms` |
+
+**expect**
+
+| 키 | 검증 |
+|---|---|
+| `status` | 응답 코드. 숫자 또는 배열 |
+| `statusLt` | 이 값보다 작아야 함 |
+| `contains` / `notContains` | 본문 문자열 포함 여부 |
+| `jsonHas` | JSON 경로가 존재해야 함. `["token", "user.id"]` |
+| `jsonEquals` | 경로별 기대값. `{"user.email": "a@b.c"}` |
+| `maxMs` | 응답 시간 상한 |
+
+**capture** 로 응답값을 변수에 담아 다음 스텝에서 `{{변수명}}` 으로 쓴다. 경로와 헤더와 본문과 기대값 모두에서 치환된다.
+
+**검증할 것을 정상 경로에만 두지 않는다.** 권한 없이 접근, 잘못된 입력, 존재하지 않는 자원, 중복 요청. `functional-spec.md` 의 예외 처리 표가 그대로 시나리오가 된다.
+
+### 2-2. 브라우저 모드
+
 ```json
 {
   "name": "login-flow",
@@ -99,177 +153,124 @@ Phase 1 정보로 `.claude/scripts/qa/scenarios/<name>.json` 작성:
 }
 ```
 
-**Quick 예시** (스모크):
-```json
-{
-  "name": "smoke-test",
-  "mode": "quick",
-  "url": "http://localhost:3000",
-  "steps": [
-    { "action": "goto", "path": "/" },
-    { "action": "goto", "path": "/about" },
-    { "action": "goto", "path": "/pricing" },
-    { "action": "goto", "path": "/dashboard" },
-    { "action": "goto", "path": "/login" }
-  ]
-}
-```
+| action | 필드 |
+|---|---|
+| `goto` | `path` 또는 `url`, `waitUntil`, `timeout` |
+| `click` | `selector`, `timeout` |
+| `fill` | `selector`, `value`, `timeout` |
+| `press` | `key` |
+| `waitForSelector` | `selector`, `timeout` |
+| `waitForURL` | `pattern`, `timeout` |
+| `wait` | `ms` |
+| `expect` | `selector` + `contains`, 또는 `urlContains` |
 
-### 2-2. 지원 action 목록
+`screens.md` 의 상태별 표시(로딩, 데이터 없음, 오류, 권한 없음)를 시나리오에 넣는다. 여기가 실제로 자주 깨진다.
 
-| action | 필드 | 설명 |
-|---|---|---|
-| `goto` | `path` 또는 `url`, `waitUntil`, `timeout` | 페이지 이동 |
-| `click` | `selector`, `timeout` | 요소 클릭 |
-| `fill` | `selector`, `value`, `timeout` | input 입력 |
-| `press` | `key` | 키보드 키 입력 (Enter, Tab 등) |
-| `waitForSelector` | `selector`, `timeout` | 요소 나타날 때까지 대기 |
-| `waitForURL` | `pattern`, `timeout` | URL 매칭 대기 |
-| `wait` | `ms` | 고정 대기 |
-| `expect` | `selector` + `contains`, 또는 `urlContains` | 어설션 |
-
-### 2-3. 사용자 승인
-
-생성한 시나리오를 **먼저 보여주고 승인 받는다**. 허락 없이 브라우저 실행 금지:
+### 2-3. 승인
 
 ```
-아래 시나리오로 진행합니다:
+아래 시나리오로 진행합니다.
 
-  1. /login 로드
-  2. #email 에 "test@example.com" 입력
-  3. #password 에 "password123" 입력
-  4. 로그인 버튼 클릭
-  5. /dashboard 로 리다이렉트 대기
-  6. h1 에 "Dashboard" 포함 검증
+  모드: API
+  대상: http://localhost:8080
 
-저장 위치: .claude/scripts/qa/scenarios/login-flow.json
-실행 모드: standard (headless)
+  1. POST /api/login          → 200, token 반환
+  2. GET  /api/me (토큰)      → 200, email 일치, 1초 이내
+  3. GET  /api/me (토큰 없음) → 401
 
-진행할까요? (수정 필요하면 알려주세요)
+  저장: .claude/scripts/qa/scenarios/auth-flow.json
+
+진행할까요? (수정할 곳이 있으면 알려주세요)
 ```
 
 ---
 
-## Phase 3: 실행 (runner)
-
-사용자 승인 시 Bash 도구로 실행:
+## Phase 3: 실행
 
 ```bash
-node .claude/scripts/qa/runner.js --scenario .claude/scripts/qa/scenarios/<name>.json
+node .claude/scripts/qa/runner.js --scenario .claude/scripts/qa/scenarios/<이름>.json
 ```
 
-옵션:
-- `--headed` : 브라우저 창 보이게 (기본은 headless)
-- `--mode=quick|standard|exhaustive` : 모드 명시 (시나리오 JSON 에도 들어가지만 override 가능)
+`runner.js` 가 시나리오의 `type` 을 보고 API 면 `api-runner.js` 로 넘긴다. 브라우저 모드는 `--headed` 로 창을 띄울 수 있다.
 
-runner 는 stdout 으로 JSON 리포트 출력. 종료 코드:
-- `0` : 모든 step 통과
-- `1` : step 실패 (리포트에 상세)
-- `2` : 잘못된 인자
-- `3` : dev server 응답 없음
-- `4` : runner 내부 크래시
+**종료 코드**
 
----
-
-## Phase 4: 결과 제시 + 요약
-
-### 4-1. 리포트 파싱 + 사용자 출력
-
-runner stdout JSON 을 파싱해서 보기 좋게 포맷:
-
-```
-📊 QA Report — <timestamp>
-
-시나리오: login-flow (mode: standard)
-URL: http://localhost:3000
-
-Steps:
-  ✅ 1. goto        /login
-  ✅ 2. fill        #email
-  ✅ 3. fill        #password
-  ✅ 4. click       button[type=submit]
-  🔴 5. waitForURL  **/dashboard
-     -> Timeout 5000ms exceeded
-     -> 스크린샷: .claude/scripts/qa/reports/<ts>-login-flow-step-5-fail.png
-
-콘솔 경고/에러:
-  [error] Failed to load resource: /api/auth (404)
-
-네트워크 실패:
-  POST /api/auth -> ERR_CONNECTION_REFUSED
-
-최종 스크린샷: .claude/scripts/qa/reports/<ts>-login-flow-final.png
-```
-
-### 4-2. 종합 판정
-
-```
-─────────────────────────────
-판정: 🔴 실패 (step 5/6)
-- 통과: 4 step
-- 실패: 1 step
-- 콘솔 에러: 1건
-- 네트워크 실패: 1건
-─────────────────────────────
-```
-
----
-
-## Phase 5: 자연 대화 후속
-
-결과에 따라 자연 대화로 이어간다.
-
-### 실패 시
-```
-실패 원인을 조사할까요?
-
-• "/investigate 로 원인 조사"     → 버그 디버깅
-• "스크린샷 보여줘"              → 파일 경로 안내
-• "시나리오 고쳐서 재실행"        → Phase 2 로 돌아가 수정
-• "일단 넘어가"                  → 종료
-• "tasks.md 에 버그 추가"         → 기록
-```
-
-### 성공 시
-```
-✅ 모든 step 통과.
-
-• "tasks.md 체크오프"             → 관련 todo 완료 처리 제안
-• "exhaustive 로도 돌려볼래"      → 모드 업그레이드 재실행
-• "다른 시나리오"                 → Phase 1 로 돌아감
-• 자연 대화로 이어가기
-```
-
-### 후속 처리 매핑
-
-| 사용자 요청 | 메인 AI 행동 |
+| 코드 | 의미 |
 |---|---|
-| "/investigate ..." | `/investigate` 커맨드로 전환. 실패 step 과 에러를 증상으로 전달. |
-| "tasks.md 에 버그 추가" | 해당 기능 섹션 `#### 버그 수정` 에 todo 추가 |
-| "재실행" | 시나리오 경로 기억해뒀다 runner 바로 재호출 |
-| "시나리오 수정" | 기존 JSON 읽어서 변경점 논의 → 덮어쓰기 → 재승인 → 실행 |
-| "보안도 확인해" | `/security-audit` 으로 전환 (QA 는 보안 감사 대체 아님) |
+| 0 | 전체 통과 |
+| 1 | 스텝 실패 |
+| 2 | 잘못된 인자 |
+| 3 | 서버 응답 없음 |
+| 4 | 내부 오류 |
 
 ---
 
-## 핵심 원칙 (위반 금지)
+## Phase 4: 결과 제시
 
-1. **사용자 승인 없이 브라우저 실행 금지**: Phase 2 에서 시나리오 확정 전 runner 호출 X.
-2. **코드 수정 금지**: `/qa` 안에서 파일 수정 X. 수정은 `/investigate` → `/task` 흐름으로.
-3. **시나리오는 저장**: 일회성 실행도 `scenarios/` 에 남긴다 (재사용/회귀 테스트 기반).
-4. **실패는 명확히**: 통과처럼 보이게 뭉뚱그리지 말 것. 🔴 로 구분.
-5. **콘솔/네트워크 경고 무시 금지**: step 이 통과해도 경고 있으면 요약에 명시.
-6. **자동 Playwright 설치는 사용자 승인 후만**: 약 320MB 다운로드 = 명시적 승인 필요.
+stdout 의 JSON 을 파싱해 보기 좋게 정리한다.
+
+```
+📊 QA 리포트 — auth-flow (API)
+
+  ✅ 1. 로그인                    POST /api/login   200   21ms
+  ✅ 2. 토큰으로 내 정보 조회      GET  /api/me      200    8ms
+  🔴 3. 토큰 없이 접근하면 거부    GET  /api/me      200    7ms
+     └ status 200 (기대 401)
+
+─────────────────────────────
+판정: 🔴 실패 (3/3 스텝 중 1개)
+- 통과 2 / 실패 1
+- 최대 응답 21ms
+─────────────────────────────
+```
+
+브라우저 모드면 콘솔 오류, 네트워크 실패, 스크린샷 경로를 함께 보여준다.
+
+실패한 스텝의 응답 본문을 함께 제시한다. 원인 파악에 필요하다.
 
 ---
 
-## 실패 시나리오 대응
+## Phase 5: 후속
+
+### 실패했을 때
+
+```
+원인을 조사할까요?
+
+• "/investigate"        → 체계적 원인 분석
+• "시나리오 수정"        → Phase 2 로 돌아가 고치고 재실행
+• "tasks.md 에 버그 추가" → 기록만
+• "넘어가"              → 종료
+```
+
+### 통과했을 때
+
+```
+✅ 전체 통과.
+
+• "/done"           → 작업 완료 처리
+• "예외 경로도 추가"  → 시나리오 보강 후 재실행
+• "다른 시나리오"     → Phase 1 로
+```
+
+| 사용자 요청 | 행동 |
+|---|---|
+| `/investigate` | 실패한 스텝과 응답을 증상으로 전달하며 전환 |
+| tasks.md 에 버그 추가 | 해당 기능 섹션에 `#### 버그 수정` 항목 추가 |
+| 재실행 | 시나리오 경로를 기억해 두었다가 바로 다시 실행 |
+| 시나리오 수정 | 기존 JSON 을 읽고 변경점을 논의한 뒤 덮어쓰고 재승인 |
+| 성능이 걱정됨 | `/perf` 로 전환. `/qa` 는 한 번씩만 호출하므로 부하 측정이 아니다 |
+
+---
+
+## 실패 시나리오
 
 | 상황 | 대응 |
 |---|---|
-| dev server 응답 없음 | "서버를 먼저 켜주세요 (기본 http://localhost:3000)" 후 중단 |
-| Playwright 설치 사용자 거부 | 중단. "설치 없이는 `/qa` 실행 불가" 안내 |
-| 시나리오 요구사항 모호 | Phase 1 에서 한 번 재질문. 그래도 모호하면 임시 가정 명시 후 진행 |
-| 선택자 틀림 (step 1~2 부터 실패) | 사용자에게 올바른 selector 물어봄. 페이지 구조 읽기 요청도 가능. |
-| 간헐 실패 (flaky) | 한 번 재실행 제안. 그래도 실패 시 `/investigate` 로 전환 권장. |
-| runner 크래시 (code=4) | stderr 의 stack 분석. Node 버전 / Playwright 버전 문제 의심. |
+| 서버 응답 없음 (코드 3) | 서버를 먼저 켜달라고 안내 후 중단 |
+| Playwright 설치 거부 | 브라우저 모드 중단. API 모드는 그대로 가능하다고 안내 |
+| 선택자가 틀림 (첫 스텝부터 실패) | 올바른 선택자를 묻거나 페이지 구조를 읽어 확인 |
+| capture 실패 | 응답 본문을 보여주고 경로를 함께 수정 |
+| 간헐 실패 | 한 번 재실행. 반복되면 `/investigate` 권장 |
+| 내부 오류 (코드 4) | stderr 스택 확인. Node 버전이나 시나리오 형식 문제 |
+| 요구가 모호함 | 한 번 재질문하고 그래도 모호하면 가정을 명시한 채 진행 |
