@@ -22,7 +22,7 @@
 
 ### 남은 작업 (백로그)
 - [ ] **Phase 4 개편** — 현업 제품 개발용으로 구조 확장. 아래 Phase 4 표 참조
-- [ ] `README.md` (GitHub용) + `docs/story.md` (포트폴리오용)
+- [ ] `docs/story.md` (포트폴리오용)
 - [ ] 실전 하니스 설치 + Dry Run 검증 (실제 새 프로젝트에서)
 
 ---
@@ -112,6 +112,7 @@
 | 4-2 | `system-architecture` 스킬 신규 (진단 → 요구 수집 → 데이터 모델 → 기술 선택 → 시스템 구조 → 코드 구조). `tech-stack-decision` 을 Step 3 로 흡수 | ✅ 2026-09-08 |
 | 4-2a | `@architect` 에이전트 신규 — 문서와 코드 대조 진단, 재검토 신호 검사, 전환 준비 상태 | ✅ 2026-09-08 |
 | 4-2b | `/architecture` 커맨드 신규 — 첫 설계와 재검토 진입점. `/kickoff` 이 내부 호출 | ✅ 2026-09-08 |
+| 4-2c | 저장소 `README.md` 작성 — 언제 무엇을 쓰는지 상황별 표, 흐름, 문서 세트, 원칙. 백로그의 Step 7 잔여 항목 | ✅ 2026-09-08 |
 | 4-3 | 템플릿 신규: `architecture`, `data-model`, `milestones`. `context-template` 에 `[architecture]` `[milestone: X]` 태그 추가 | |
 | 4-4 | `/kickoff` 분기 — 새 아이디어 / 기존 기획. 합류 후 `system-architecture` 호출. CI 설정 확인 | |
 | 4-5 | 템플릿 신규: `functional-spec`, `screens`. `feature-prd-template` 에서 겹치는 부분 정리 | |
@@ -127,7 +128,7 @@
 | 4-15 | `freshness.js` 제거. 문서 신선도를 git 커밋 시각 기준으로 판정하도록 `/project-status` 수정 | |
 | 4-16 | `auto-skill` 키워드에서 흔한 단어 제거. 커맨드 변경 반영 | |
 | 4-17 | `/project-status` 에 마일스톤 진행 섹션 추가 | |
-| 4-18 | `CLAUDE.md` 와 이 문서 갱신, 저장소 `README.md` 작성 | |
+| 4-18 | `CLAUDE.md` 와 이 문서 갱신 | |
 
 ### Phase 5 (먼 미래)
 
