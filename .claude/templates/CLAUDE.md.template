@@ -9,106 +9,135 @@
 
 - **이름**: <!-- 프로젝트 이름 -->
 - **한 줄 설명**: <!-- 누구에게 무엇을 제공하는지 -->
-- **현재 Phase**: <!-- MVP / Beta / Launch / Scale -->
+- **현재 단계**: <!-- PoC / MVP / 제품화 / 운영 -->
 
-> 상세 배경/전략: [`docs/plan.md`](docs/plan.md)
+> 제품 방향: [`docs/plan.md`](docs/plan.md) · 시스템 구조: [`docs/architecture.md`](docs/architecture.md)
 
 ---
 
 ## 🗂️ 문서 구조
 
-### 프로덕트 레벨 3대 문서 (필수 참조)
+### 프로덕트 레벨
 
-| 문서 | 역할 | 경로 |
-|---|---|---|
-| **계획서** | 왜/무엇을 (설계도) | [`docs/plan.md`](docs/plan.md) |
-| **맥락 노트** | 결정의 이유 (시방서) | [`docs/context.md`](docs/context.md) |
-| **체크리스트** | 지금 할 일 (공정표) | [`docs/tasks.md`](docs/tasks.md) |
+| 문서 | 답하는 질문 |
+|---|---|
+| [`docs/plan.md`](docs/plan.md) | 왜 만들고 무엇을 만들고 어디로 가는가 |
+| [`docs/milestones.md`](docs/milestones.md) | 언제까지 무엇을 내고 무엇이 되면 끝인가 |
+| [`docs/architecture.md`](docs/architecture.md) | 시스템이 지금 어떤 모양인가 |
+| [`docs/data-model.md`](docs/data-model.md) | 어떤 데이터를 어떤 관계로 어디에 두는가 |
+| [`docs/context.md`](docs/context.md) | 왜 그렇게 결정했는가, 지금 어디까지 구현됐는가 |
+| [`docs/tasks.md`](docs/tasks.md) | 지금 무엇을 하고 다음에 무엇을 하는가 |
+
+`plan.md` 는 6개월 뒤에도 그대로일 내용만 담습니다. 진행 상태와 기한은 `milestones.md`, 측정 수치와 결정 이유는 `context.md` 자리입니다.
+
+`architecture.md` 는 항상 **현재 상태만** 담습니다. 과거 구조를 남기지 않고, 왜 바뀌었는지는 전부 `context.md` 의 ADR 이 갖습니다.
 
 ### 기능별 문서
 
-각 기능은 `docs/features/<기능명>/` 아래에 2개 파일을 갖습니다.
+각 기능은 `docs/features/<기능명>/` 아래에 놓입니다. 범위에 따라 만드는 문서가 달라집니다.
 
-| 파일 | 역할 | 생성 시점 |
+| 파일 | 답하는 질문 | 만드는 시점 |
 |---|---|---|
-| `prd.md` | 기획 (무엇/왜) | `/feature-start` 실행 시 |
-| `tech-spec.md` | 기술 설계 (어떻게) | `/feature-plan` 실행 시 |
+| `prd.md` | 이 기능을 왜 만드는가 | `/feature-start` |
+| `functional-spec.md` | 무엇이 어떻게 동작하는가 | `/feature-start` |
+| `screens.md` | 화면에 무엇이 놓이고 어떻게 움직이는가 | `/feature-start` (화면이 있을 때만) |
+| `tech-spec.md` | 어떤 API·테이블·코드 구조로 만드는가 | `/feature-plan` |
 
-```
-docs/
-├── plan.md
-├── context.md
-├── tasks.md
-└── features/
-    ├── signup/
-    │   ├── prd.md
-    │   └── tech-spec.md
-    └── payment/
-        ├── prd.md
-        └── tech-spec.md
-```
+작은 기능은 폴더를 만들지 않고 `tasks.md` 항목 하나로 끝냅니다.
+
+### 생성물 (손으로 고치지 않음)
+
+| 파일 | 내용 | 생성 |
+|---|---|---|
+| `README.md` | 제품 개요, 현재 단계, 되는 것과 안 되는 것, 실행 방법 | `/compile-spec` |
+| `docs/spec-index.md` | 전체 기능 명세 | `/compile-spec` |
+| `docs/screens-index.md` | 전체 화면 목록 | `/compile-spec` |
 
 ---
 
 ## 🛠️ 기술 스택
 
-<!-- plan.md 6번에서 가져오기 -->
+<!-- architecture.md 에서 가져오기 -->
 
-- **프론트엔드**:
-- **백엔드**:
+- **언어 / 프레임워크**:
 - **데이터베이스**:
 - **배포**:
+- **CI**:
 
 ---
 
 ## 🚦 작업 워크플로우
 
 ### 새 기능 개발
+
 ```
-/feature-start <기능명>    → docs/features/<name>/prd.md 생성
+/feature-start <기능명>   범위(백엔드/프론트/양쪽)와 크기를 먼저 확인
+   ↓                      → prd.md, functional-spec.md, (screens.md)
+/feature-plan <기능명>    → tech-spec.md, tasks.md 분해,
+   ↓                        feature/<기능명> 브랜치 생성
+/task                     다음 할 일 진입, 관련 문서 자동 로드
+   ↓  [구현 대화]
+/done                     AC 검증 → 체크오프 → 커밋
+   ↓  (다음 /task 반복)
+/code-review              변경 리뷰
+/qa                       백엔드면 API 시나리오, 화면이 있으면 브라우저
    ↓
-/feature-plan <기능명>     → docs/features/<name>/tech-spec.md 생성
-                              + tasks.md에 Task 분해 추가
-   ↓
-/task                      → 다음 task 진입 (맥락 자동 로드)
-   ↓ [구현 대화]
-   ↓ 완료 선언 → tasks.md 체크오프
-   ↓ 다음 /task 반복
-   ↓
-/code-review               → 기능 전체 리뷰
-   ↓
-/update-docs               → ADR 추가 + Impl Snapshot 갱신
+/ship                     CI 확인 → 버전 → CHANGELOG → PR
 ```
 
 ### 유지관리
+
 ```
-/project-status  → 지금 어디까지 왔는지 확인
-/update-docs     → 3문서 최신화
+/project-status   지금 어디까지 왔는지
+/decision         결정이 생긴 자리에서 ADR 기록
+/update-docs      문서 일괄 갱신
+/compile-spec     마일스톤 끝에 전체 명세와 README 갱신
+/perf             부하와 응답 시간 측정
 ```
 
 ### 서브에이전트
 
-아래 서브에이전트들은 **커맨드 실행 중 자동 호출**됩니다.
-사용자가 직접 호출할 필요는 없지만, 필요하면 자연어로 요청 가능.
+커맨드 실행 중 자동으로 호출됩니다. 직접 부를 필요는 없고 필요하면 자연어로 요청하면 됩니다.
 
 | 에이전트 | 역할 | 호출 시점 |
 |---|---|---|
-| `@plan-reviewer` | 기획/설계 문서 검토 | `/kickoff`, `/feature-start`, `/feature-plan` 내부 |
-| `@reviewer` | 코드 리뷰 | `/code-review` 내부 |
-| `@security` | 보안 심화 감사 | `/code-review` 보안 옵션 또는 플래그 감지 시 (예: "보안도 봐줘") |
+| `@plan-reviewer` | 기획·설계 문서 검토 | `/kickoff`, `/feature-start`, `/feature-plan` 내부 |
+| `@reviewer` | 코드 리뷰 | `/code-review`, `/ship` 내부 |
+| `@security` | 보안 심화 감사 | `/security-audit`, 민감 영역 감지 시 |
 
 ---
 
-## ⚠️ 핵심 원칙
+## 📐 공통 작업 규칙
 
-<!-- 프로젝트 고유의 절대 규칙을 여기 적으세요 -->
+> 모든 커맨드가 이 규칙을 따릅니다. 커맨드 문서에는 그 커맨드만의 규칙만 적혀 있습니다.
 
-- 작업 시작 전 `docs/tasks.md` 및 해당 기능의 `docs/features/<name>/tech-spec.md` 확인
-- 중요한 결정은 `docs/context.md`에 ADR 형식으로 기록
-- 완료된 작업은 `docs/tasks.md`에서 `[x]` 체크 + "완료된 작업" 섹션으로 이동
-- 각 작업 항목은 **Effort (S/M/L/XL) + Acceptance Criteria** 를 반드시 포함
-- 커밋 전 `/code-review` 실행 권장
-- 긴 작업 종료 시 `/update-docs`로 `context.md`의 Implementation Snapshot 갱신
+**말투** — 직설적이고 간결하게. "delve", "crucial", "robust" 같은 기업·학술 표현과 "흥미롭네요", "여러 방법이 있죠" 같은 회피형 표현을 쓰지 않습니다. 입장이 필요하면 입장을 냅니다.
+
+**승인 후 반영** — 파일을 먼저 고치고 결과를 보고하지 않습니다. 무엇을 어떻게 바꿀지 제안하고 승인을 받은 뒤 반영합니다. 리뷰 의견도 자동으로 반영하지 않습니다.
+
+**초안과 확정을 가릅니다** — 진행 중인 산출물은 `.draft/` 에 두고 `docs/` 에는 확정된 것만 씁니다. 중간에 끊겨도 `.draft/` 의 progress 파일로 이어받습니다.
+
+**에이전트는 배치로 돕니다** — `@plan-reviewer`, `@reviewer`, `@security` 는 사용자와 대화하지 않고 리포트만 반환합니다. 인터뷰가 필요한 일은 메인 세션이 직접 합니다.
+
+**스킬은 Skill 도구로 로드합니다** — 스킬 내용을 수동으로 옮겨 적지 않습니다.
+
+**리포트는 파일로 남기지 않습니다** — 리뷰와 감사 결과는 세션에만 출력합니다. 남겨야 하면 `tasks.md` 항목이나 ADR 로 옮깁니다.
+
+**선택지를 강제하지 않습니다** — A/B/C/D 메뉴를 고정으로 내밀지 않고 자연 대화로 이어갑니다.
+
+**최신 상태만 남깁니다** — 문서를 고칠 때 "원래는 A였으나", "앞에서 말한", "재배치했다" 같은 이력 문구를 본문에 남기지 않고 처음부터 그렇게 쓴 것처럼 다시 씁니다. 이력은 ADR 과 git 이 갖습니다.
+
+**커밋은 단계 단위, 푸시는 요청이 있을 때만** — 할 일 하나가 끝나면 커밋 메시지를 제안합니다. 푸시는 사용자가 명시적으로 요청할 때만 합니다.
+
+**프로젝트 루트에서 실행합니다** — 하위 디렉토리에서 실행하면 경로 해석이 어긋납니다.
+
+---
+
+## ⚠️ 프로젝트 고유 규칙
+
+<!-- 이 프로젝트에만 적용되는 절대 규칙을 여기 적으세요 -->
+
+-
 
 ---
 
@@ -122,4 +151,4 @@ docs/
 
 ## 🔗 참고
 
-- 이 프로젝트의 하니스 기반: [harness](https://github.com/<username>/harness)
+- 이 프로젝트의 하니스 기반: [harness](https://github.com/Kimprodp/harness)

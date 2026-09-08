@@ -108,8 +108,8 @@
 | Step | 내용 | 상태 |
 |---|---|---|
 | 4-0 | `docs/spec.md` 설계 정본 작성 + 이 작업 계획 | ✅ 2026-09-08 |
-| 4-1 | 공통 규칙을 `CLAUDE.md.template` 으로 추출. 커맨드에는 고유 규칙만 남김 | |
-| 4-2 | `system-architecture` 스킬 신규 (요구 수집 → 데이터 모델 → 기술 선택 → 시스템 구조). `tech-stack-decision` 을 Step 3 로 흡수 | |
+| 4-1 | 공통 규칙을 `CLAUDE.md.template` 으로 추출. 커맨드에는 고유 규칙만 남김 | 🔶 템플릿 완료, 커맨드 정리는 각 커맨드 수정 시 |
+| 4-2 | `system-architecture` 스킬 신규 (요구 수집 → 데이터 모델 → 기술 선택 → 시스템 구조). `tech-stack-decision` 을 Step 3 로 흡수 | ✅ 2026-09-08 |
 | 4-3 | 템플릿 신규: `architecture`, `data-model`, `milestones`. `context-template` 에 `[architecture]` `[milestone: X]` 태그 추가 | |
 | 4-4 | `/kickoff` 분기 — 새 아이디어 / 기존 기획. 합류 후 `system-architecture` 호출. CI 설정 확인 | |
 | 4-5 | 템플릿 신규: `functional-spec`, `screens`. `feature-prd-template` 에서 겹치는 부분 정리 | |
