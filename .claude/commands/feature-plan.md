@@ -13,22 +13,29 @@ argument-hint: <기능명>
 
 ---
 
-## 전제 조건
+## 이 커맨드만의 규칙
 
-- **프로젝트 루트에서 실행**.
-- `docs/features/<기능명>/prd.md` 존재 필수 (없으면 `/feature-start <기능명>` 먼저 안내하고 중단).
-- `docs/plan.md`, `docs/context.md`, `CLAUDE.md` 존재 필수 (맥락 필요).
-- 사용자와 **직접 대화** (서브에이전트로 인터뷰 금지).
-- 말투 안티패턴 금지.
+> 말투, 승인 절차, 초안과 확정 구분 같은 공통 규칙은 `CLAUDE.md` 의 공통 작업 규칙을 따른다.
+
+1. **섹션은 순차로, 앞 섹션의 이슈를 해결한 뒤 다음으로.** 병렬로 진행하지 않는다.
+2. **섹션 내 이슈는 하나씩 확인한다.** 여러 질문을 한 번에 묶어 던지지 않는다.
+3. **회귀 테스트는 기본 포함.** 확인 없이 자동으로 넣는다.
+4. **PRD 범위를 벗어나지 않는다.** 벗어나면 PRD 를 고칠지 확인한다.
+5. **아키텍처에 영향이 있으면 여기서 정하지 않는다.** `/architecture` 를 먼저 돌리라고 안내한다.
 
 ---
 
 ## Phase 0: 선행 체크 + 맥락 로드
 
 ### 0-1. 맥락 로드
-- Read: `docs/features/<기능명>/prd.md` (필수)
-- Read: `docs/plan.md`, `docs/context.md`, `CLAUDE.md`
-- PRD를 요약하여 사용자에게 1~2문장으로 "이 기능 설계를 시작한다"는 확인 출력.
+
+- Read: `docs/features/<기능명>/prd.md` (필수. 없으면 `/feature-start <기능명>` 안내 후 중단)
+- Read: `docs/features/<기능명>/functional-spec.md` (필수. 동작 규칙이 설계의 입력이다)
+- Read: `docs/features/<기능명>/screens.md` (있으면)
+- Read: `docs/plan.md`, `docs/architecture.md`, `docs/data-model.md`, `docs/context.md`, `CLAUDE.md`
+- PRD 와 기능 명세를 요약해 한두 문장으로 설계 시작을 알린다.
+
+`docs/plan.md` 나 `docs/architecture.md` 가 없으면 `/kickoff` 안내 후 중단한다.
 
 ### 0-2. 기존 design 체크
 
@@ -189,6 +196,26 @@ Agent(
 1. `.draft/features/<기능명>/tech-spec-draft.md` → `docs/features/<기능명>/tech-spec.md`.
 2. Progress 파일에 완료 스탬프.
 
+### 4-3. 아키텍처 영향 반영
+
+설계 중에 시스템 구조나 데이터 모델이 바뀌어야 한다고 드러났으면 여기서 처리한다.
+
+**작은 변경** (엔티티에 컬럼 추가, 기존 구조 안에서 해결되는 것) — `docs/data-model.md` 를 갱신하고 `/decision` 으로 ADR 을 남긴다.
+
+**큰 변경** (새 엔티티 여러 개, 구성 요소 추가, 통신 방식 변경, 저장소 변경) — 여기서 고치지 않는다. 사용자에게 알리고 `/architecture` 를 먼저 돌리라고 안내한다.
+
+```
+⚠️ 이 설계는 시스템 구조 변경을 수반합니다.
+
+  <무엇이 바뀌어야 하는지>
+
+/architecture 로 구조를 먼저 정리한 뒤 이 기능으로 돌아오는 것을 권합니다.
+그대로 진행하면 architecture.md 와 실제 코드가 벌어집니다.
+
+  - "/architecture 실행"  → 구조 재검토로 전환
+  - "그대로 진행"         → 경고만 기록하고 계속
+```
+
 ---
 
 ## Phase 5: tasks.md 에 Task 분해 추가
@@ -244,37 +271,73 @@ PRD: features/<기능명>/prd.md
   - 의존: <선행 작업> (있으면)
 ```
 
-### 산출
-사용자에게 완료 요약:
+---
+
+## Phase 6: 작업 브랜치 생성
+
+작업 분해까지 끝났으면 이 기능의 브랜치를 만든다. 기능 이름과 범위가 확정된 시점이라 여기가 맞다. 이후 모든 `/task` 와 `/done` 이 이 브랜치에서 돌고 `/ship` 이 PR 로 올린다.
+
+### 6-1. 현재 상태 확인
+
+```bash
+git branch --show-current
+git status --short
+```
+
+- 이미 `feature/<기능명>` 에 있으면 건너뛴다
+- 다른 feature 브랜치에 있으면 사용자에게 알리고 어떻게 할지 확인한다
+- 커밋하지 않은 변경이 있으면 알린다. 브랜치를 만들면 그 변경이 따라온다
+
+### 6-2. base 확인과 생성
+
+base 는 `main` 이 기본이고 없으면 `master` 다. 프로젝트가 다르면 `git symbolic-ref refs/remotes/origin/HEAD` 로 감지한다.
 
 ```
-✅ Feature Design 완료 — <기능명>
+브랜치를 만들까요?
+
+  base:   <base>
+  브랜치: feature/<기능명>
+
+  (원격이 있으면 base 를 먼저 fetch 합니다)
+```
+
+승인하면 실행한다.
+
+```bash
+git fetch origin <base>        # 원격이 있을 때만
+git checkout <base>
+git merge --ff-only origin/<base>   # 원격이 있을 때만
+git checkout -b feature/<기능명>
+```
+
+`--ff-only` 가 실패하면 로컬 base 가 원격과 갈라진 것이다. 자동으로 해결하지 않고 사용자에게 알린 뒤 현재 위치에서 브랜치를 딸지 확인한다.
+
+git 저장소가 아니면 이 Phase 를 건너뛰고 그 사실을 알린다.
+
+---
+
+## 산출
+
+```
+✅ 기술 설계 완료 — <기능명>
 
 생성:
 - docs/features/<기능명>/tech-spec.md
-- docs/tasks.md에 <N>개 Task 추가 (Phase 1 > 기능: <기능명>)
+- docs/tasks.md 에 작업 <N>개 추가
+- 브랜치 feature/<기능명>
 
-참조: .draft/features/<기능명>/ (진행 과정 원본 보존)
+<아키텍처 영향이 있었으면 여기에 표시>
 
-이어서 구현을 시작하시겠어요?
-- "네" / "Y" / "진행" → /task 실행 (첫 미완료 task 맥락 로드)
-- "나중에" / "N" → 종료 (나중에 /task 로 재개)
+참조: .draft/features/<기능명>/ (진행 과정 보존)
 
-또는 다른 선택:
-- 구현 완료 후: /code-review
-  → 인증/결제/외부 API 관련이면 "보안도 같이 봐줘"라고 말하거나
-    `/code-review 보안까지` 로 실행 (보안 심화 감사 포함)
-- 상황 확인: /project-status
+이어서 구현을 시작할까요?
+- "네" → /task 실행 (첫 작업 맥락 로드)
+- "나중에" → 종료
 ```
 
-### 자동 연속 호출 메커니즘
+### 연속 호출
 
-사용자가 "네/Y/진행" 응답 시:
-1. `.claude/commands/task.md` 를 Read 도구로 로드.
-2. 그 파일의 Phase 지시를 **현재 세션 내에서 이어서 수행**한다.
-3. 사용자는 재입력 불필요.
-
-> 만약 동작이 이상하면 사용자가 직접 `/task` 를 입력해도 된다.
+사용자가 동의하면 `.claude/commands/task.md` 를 Read 로 로드하고 그 지시를 이어서 수행한다.
 
 ---
 
@@ -286,12 +349,14 @@ PRD: features/<기능명>/prd.md
 
 ---
 
-## 핵심 원칙 (위반 금지)
+## 실패 시나리오
 
-1. **Sequential + STOP Gates**: Section 1~4는 순차. 이전 섹션 이슈 해결 전 다음 섹션 진행 금지.
-2. **개별 AskUserQuestion**: 섹션 내 이슈는 **하나씩** 사용자 확인. 배치 질문 금지.
-3. **회귀 테스트는 기본 포함**: 사용자 확인 없이 자동 추가.
-4. **Outside Voice는 선택, 자동 반영 금지**.
-5. **docs/features/<기능명>/tech-spec.md** 는 Phase 4-2 확정 시에만 쓰기.
-6. **tasks.md Phase 5에서만 추가**. 중간에 건드리지 않기.
-7. **PRD 범위 벗어난 설계 금지**. 벗어나면 사용자에게 PRD 수정 여부 확인.
+| 상황 | 대응 |
+|---|---|
+| `prd.md` 또는 `functional-spec.md` 없음 | `/feature-start <기능명>` 안내 후 중단 |
+| 설계가 PRD 범위를 벗어남 | PRD 를 고칠지 설계를 좁힐지 확인 |
+| 시스템 구조 변경이 필요 | Phase 4-3 의 안내대로 `/architecture` 선행 권장 |
+| base 브랜치가 원격과 갈라짐 | 자동 해결하지 않고 사용자에게 알린 뒤 현재 위치에서 딸지 확인 |
+| git 저장소가 아님 | Phase 6 을 건너뛰고 알림 |
+| 커밋하지 않은 변경이 있음 | 브랜치에 따라온다는 사실을 알리고 진행 여부 확인 |
+| Section 3 중간에 끊김 | Coverage Diagram 을 반드시 draft 에 저장 |
