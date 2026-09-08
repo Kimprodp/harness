@@ -155,6 +155,7 @@ Thumbs.db
 !.claude/state/.gitkeep
 .claude/scripts/*/reports/
 .claude/scripts/*/snapshots/
+.claude/scripts/*/mockups/
 
 # Test output
 /tmp/
