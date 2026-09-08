@@ -1,9 +1,10 @@
 # 기능 PRD: <기능명>
 
-> **역할**: 이 기능의 **기획 문서** (무엇을 왜 만드나)
+> **역할**: 이 기능을 **왜 만드는가**
+> 무엇이 어떻게 동작하는지는 [`functional-spec.md`](functional-spec.md),
+> 화면 구성은 [`screens.md`](screens.md), 구현 설계는 [`tech-spec.md`](tech-spec.md).
 > **산출 시점**: `/feature-start <기능명>` 실행 시
 > **후속 문서**: `tech-spec.md` (`/feature-plan`에서 생성)
-> **Last Updated**: <YYYY-MM-DD>
 
 ---
 
@@ -48,7 +49,9 @@
 - **정성 지표**: <!-- 예: 사용자 피드백, NPS -->
 - **실패 신호**: <!-- 이 기능이 실패했다고 판단할 기준 -->
 
-## 7. 플로우 / UX 요구사항
+## 7. 사용자가 겪는 흐름
+
+사용자가 무엇을 하려고 어떤 순서로 움직이는지. 큰 흐름만 적는다. 화면 구성과 요소는 [`screens.md`](screens.md), 동작 규칙은 [`functional-spec.md`](functional-spec.md) 자리다.
 
 > 화면 흐름, 주요 인터랙션을 간단히 서술 (상세는 tech-spec.md)
 

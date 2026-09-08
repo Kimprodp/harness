@@ -1,9 +1,9 @@
 # 기능 기술 설계: <기능명>
 
 > **역할**: 이 기능의 **기술 설계 문서** (어떻게 만드나)
-> **산출 시점**: `/feature-plan` 실행 시 (PRD 읽고 작성)
-> **전제 문서**: `prd.md` (무엇을/왜)
-> **Last Updated**: <YYYY-MM-DD>
+> **산출 시점**: `/feature-plan` 실행 시
+> **전제 문서**: [`prd.md`](prd.md) 왜 만드는가 · [`functional-spec.md`](functional-spec.md) 무엇이 어떻게 동작하는가 · [`screens.md`](screens.md) 화면 구성
+> **이 문서가 답하는 것**: 그것을 어떤 API·테이블·코드 구조로 만드는가
 
 ---
 

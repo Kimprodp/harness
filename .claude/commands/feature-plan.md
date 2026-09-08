@@ -1,5 +1,5 @@
 ---
-description: 기능 기술 설계 (tech-spec.md 작성) — tech-spec 스킬 + @plan-reviewer 검토 + tasks.md Task 분해
+description: 기능 기술 설계 — tech-spec 작성, 작업 분해, 브랜치 생성
 argument-hint: <기능명>
 ---
 
@@ -37,11 +37,10 @@ argument-hint: <기능명>
 
 `docs/plan.md` 나 `docs/architecture.md` 가 없으면 `/kickoff` 안내 후 중단한다.
 
-### 0-2. 기존 design 체크
+### 0-2. 기존 설계 확인
 
-- `docs/features/<기능명>/tech-spec.md` 존재?
-  → 사용자에게: **"design이 이미 있다. 어떻게 할까?"**
-    - A. 덮어쓰기 (기존은 `design.backup-<timestamp>.md`로)
+- `docs/features/<기능명>/tech-spec.md` 가 이미 있으면 사용자에게 확인한다.
+    - A. 덮어쓰기 (기존은 `tech-spec.backup-<timestamp>.md` 로)
     - B. 취소
 - `.draft/features/<기능명>/feature-plan-progress.md` 존재? → 이어서 진행 여부 확인.
 
@@ -163,16 +162,21 @@ Agent(
 - .draft/features/<기능명>/tech-spec-draft.md
 
 참조 맥락:
-- docs/features/<기능명>/prd.md (범위 일관성 확인용)
-- docs/plan.md §6 (기술 스택 일관성)
-- docs/context.md (ADR과 충돌 확인)
+- docs/features/<기능명>/prd.md (범위 일관성)
+- docs/features/<기능명>/functional-spec.md (동작 규칙을 빠짐없이 설계했는가)
+- docs/features/<기능명>/screens.md (있으면. 화면 요구를 설계가 감당하는가)
+- docs/architecture.md (구조 제약과 코드 규약을 지키는가)
+- docs/data-model.md (엔티티 변경이 반영됐는가)
+- docs/context.md (기존 ADR 과 충돌하는가)
 
 체크 포인트:
 1. 스킬 지침의 Feature Design 체크리스트
 2. PRD 범위를 벗어나지 않는가
-3. 필수 6개 산출물 섹션 완비
-4. Coverage Diagram 실제로 경로를 다루는가
-5. Failure Modes가 "실제 프로덕션"에서 일어날 일인가
+3. functional-spec 의 동작 규칙과 예외 처리가 설계에 전부 반영됐는가
+4. 필수 산출물 섹션 완비
+5. Coverage Diagram 이 실제로 경로를 다루는가
+6. Failure Modes 가 실제 프로덕션에서 일어날 일인가
+7. architecture.md 의 코드 구조 결정(패키지, 예외 처리)을 따르는가
 `
 )
 ```
@@ -230,7 +234,7 @@ Agent(
 ### 실행
 1. `tech-spec.md` 의 "Parallelization Strategy" + "Section 3 테스트 계획" 을 기반으로 구체 Task 도출.
 2. 각 Task 에 **자연어 단계명 + Effort (S/M/L/XL)** 부여. 코드 수준 AC 는 tech-spec.md 가 SoT.
-3. `docs/tasks.md` 의 Phase 1 아래 해당 기능 서브섹션에 추가.
+3. `docs/tasks.md` 의 현재 마일스톤 아래 해당 기능 서브섹션에 추가.
 
 ### 형식 (자연어 인덱스 — 권장)
 
@@ -241,8 +245,9 @@ Agent(
 > 무엇: <비개발자도 이해할 수 있는 한 줄 설명>
 > 다음: <다음 단계 자연어>
 
-PRD: features/<기능명>/prd.md
-설계: features/<기능명>/tech-spec.md  ← 코드 수준 AC, 시그니처는 여기
+PRD: features/<기능명>/prd.md          왜 만드는가
+명세: features/<기능명>/functional-spec.md  동작 규칙
+설계: features/<기능명>/tech-spec.md       코드 수준 AC, 시그니처는 여기
 
 #### 단계
 - [ ] 1. <자연어 단계명> [Effort]

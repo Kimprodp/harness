@@ -2,7 +2,6 @@
 
 > **역할**: 진행 중인 작업의 **자연어 인덱스**
 > **갱신 주기**: 매 단계 완료 시
-> **Last Updated**: <YYYY-MM-DD>
 
 ---
 
@@ -66,8 +65,9 @@
 > 무엇: <비개발자도 이해할 수 있는 한 줄 설명>
 > 다음: <다음 단계 자연어>
 
-PRD: features/<이름>/prd.md
-설계: features/<이름>/tech-spec.md  ← 코드 수준 AC 는 여기
+PRD: features/<이름>/prd.md          왜 만드는가
+명세: features/<이름>/functional-spec.md  동작 규칙
+설계: features/<이름>/tech-spec.md       코드 수준 AC 는 여기
 
 #### 단계
 - [ ] 1. <단계명>
