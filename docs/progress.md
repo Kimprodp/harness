@@ -3,25 +3,24 @@
 > harness 프로젝트의 Step별 진행 로그 + 주요 결정 기록.
 > 신규 세션 진입 또는 대화 압축 후 현재 상태 복구용.
 
-**Last Updated**: 2026-09-08
-
 ---
 
 ## 📊 현재 상태
 
-**Phase 3.5 구현 완료**. 하니스 기본 기능 세트 + 자동화 (Playwright / 보안 주기 상기 / 설치 스크립트) + 결정 기록·기술 부채·시안 탐색 커맨드 완성.
+**Phase 4 개편 진행 중**. 개인 프로젝트 전용이던 구조를 회사 제품 개발까지 받도록 넓히는 중이다. 목표 구조는 [spec.md](spec.md) 가 정본이고, 진행 상황은 아래 Phase 4 표에 있다.
 
 ### 핵심 산출물 (전체 누적)
-- **에이전트 3개**: `@plan-reviewer`, `@reviewer`, `@security`
-- **스킬 6개**: `idea-validation`, `product-spec`, `scope-review`, `tech-stack-decision`, `tech-spec`, `design-slop-patterns`
-- **커맨드 15개**: `/kickoff`, `/feature-start`, `/feature-plan`, `/task`, `/code-review`, `/project-status`, `/update-docs`, `/investigate`, `/qa`, `/design-review`, `/design-shotgun`, `/security-audit`, `/decision`, `/cleanup`, `/ship`
+- **에이전트 4개**: `@plan-reviewer`, `@architect`, `@reviewer`, `@security`
+- **스킬 7개**: `idea-validation`, `product-spec`, `scope-review`, `system-architecture`, `tech-stack-decision`, `tech-spec`, `design-slop-patterns`
+- **커맨드 16개**: `/kickoff`, `/architecture`, `/feature-start`, `/feature-plan`, `/task`, `/code-review`, `/project-status`, `/update-docs`, `/investigate`, `/qa`, `/design-review`, `/design-shotgun`, `/security-audit`, `/decision`, `/cleanup`, `/ship`
 - **Hook 2개 + 스캐폴딩**: `freshness.js` (Stop), `auto-skill.js` (UserPromptSubmit), `post-edit.example.js` (PostToolUse, 빈 슬롯)
 - **스크립트 9개**: `_shared` 3종, `qa/runner.js`, `design-review` 3종 (capture/dom-check/mockup-gen), `ship` 2종 (bump-version/changelog-gen)
 - **설치 스크립트**: `install.sh`, `install.ps1` (cross-platform)
-- **템플릿 6개**: 하이브리드 구조 (plan/context/tasks + feature prd/tech-spec)
+- **템플릿 6개**: plan/context/tasks + feature prd/tech-spec + CLAUDE.md
+- **문서**: `README.md` (사용자용), `docs/spec.md` (구조 정본), `docs/progress.md` (이력), `CLAUDE.md` (개발 맥락)
 
 ### 남은 작업 (백로그)
-- [ ] **Phase 4 개편** — 현업 제품 개발용으로 구조 확장. 아래 Phase 4 표 참조
+- [ ] **Phase 4 개편** — 4-3 이후. 아래 Phase 4 표 참조
 - [ ] `docs/story.md` (포트폴리오용)
 - [ ] 실전 하니스 설치 + Dry Run 검증 (실제 새 프로젝트에서)
 
@@ -47,12 +46,7 @@
 | 6.6 | 1차 Dry Run 이슈 반영 (`templates/` → `.claude/templates/` 이동, Phase 5-3 오기재 수정, 연속성 호출 메커니즘 명시, git log 문법, AC 검증 구체화) | 2026-04-18 |
 | 6.7 | 2차 Dry Run 이슈 반영 (완료된 기능 아카이브 구조, task 체크오프 로직 재설계, Phase 하드코딩 제거, git init 제안, 문서 신선도 기준) | 2026-04-18 |
 
-### Phase 1 남은 작업
-
-- [ ] **Step 7**: `README.md` (GitHub용 간결) + `docs/story.md` (포트폴리오용) + (선택) 미니 mock 테스트
-- [ ] **Step 7-0 (이 문서 생성)**: Compact 방어 — `CLAUDE.md`, `docs/progress.md`, 메모리 인덱스 ← **지금 진행 중**
-
-### Phase 2 (진행 중 — 축소판)
+### Phase 2 (축소판)
 
 | Step | 내용 | 날짜 |
 |---|---|---|
@@ -113,6 +107,7 @@
 | 4-2a | `@architect` 에이전트 신규 — 문서와 코드 대조 진단, 재검토 신호 검사, 전환 준비 상태 | ✅ 2026-09-08 |
 | 4-2b | `/architecture` 커맨드 신규 — 첫 설계와 재검토 진입점. `/kickoff` 이 내부 호출 | ✅ 2026-09-08 |
 | 4-2c | 저장소 `README.md` 작성 — 언제 무엇을 쓰는지 상황별 표, 흐름, 문서 세트, 원칙. 백로그의 Step 7 잔여 항목 | ✅ 2026-09-08 |
+| 4-2d | 문서 역할 정리 — README(사용자용) / spec.md(구조 정본) / progress.md(이력) / CLAUDE.md(개발 맥락) 로 갈라 중복 제거. README 재작성, CLAUDE.md 에서 구조 설명과 현재 상태 제거, `Last Updated` 필드 폐지 | ✅ 2026-09-08 |
 | 4-3 | 템플릿 신규: `architecture`, `data-model`, `milestones`. `context-template` 에 `[architecture]` `[milestone: X]` 태그 추가 | |
 | 4-4 | `/kickoff` 분기 — 새 아이디어 / 기존 기획. 합류 후 `system-architecture` 호출. CI 설정 확인 | |
 | 4-5 | 템플릿 신규: `functional-spec`, `screens`. `feature-prd-template` 에서 겹치는 부분 정리 | |
@@ -228,11 +223,12 @@
 ## 🚧 중단/재개 참조
 
 ### 세션 재진입 시 해야 할 일
-1. `CLAUDE.md` 읽기 (프로젝트 전체 맥락)
-2. 이 파일(`docs/progress.md`) 읽기 (상세 진행 상태)
-3. 사용자에게 "어디서부터 이어갈까요?" 확인
-4. 필요 시 `.claude/` 하위 관련 파일 참조
+1. `CLAUDE.md` 읽기 — 프로젝트 정체와 작업 규칙
+2. `docs/spec.md` 읽기 — 목표 구조의 정본
+3. 이 파일 읽기 — 어디까지 왔는지
+4. 사용자에게 이어갈 지점 확인
 
 ### 주의
-- **대화 압축 후에는 이 문서와 CLAUDE.md가 유일한 진짜 맥락**
-- 세부 기억이 불확실하면 반드시 이 두 문서 재확인 후 작업
+- 대화 압축 후에는 위 세 문서가 유일한 맥락이다
+- 세부가 불확실하면 추측하지 말고 세 문서를 다시 읽는다
+- 구조를 바꾸려면 `docs/spec.md` 를 먼저 고친다
