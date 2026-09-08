@@ -11,7 +11,7 @@ Hook 이란 Claude Code 내부의 특정 이벤트(사용자 프롬프트 제출
 
 | 이벤트 | 발동 시점 | 하니스 기본 활용 |
 |---|---|---|
-| `UserPromptSubmit` | 사용자가 메시지 보낸 직후 | (Phase 3 예정: auto-skill) |
+| `UserPromptSubmit` | 사용자가 메시지 보낸 직후 | **auto-skill** (스킬 힌트 주입 + 보안·cleanup 주기 상기) |
 | `PreToolUse` | 도구 실행 직전 | (미사용) |
 | `PostToolUse` | 도구 실행 직후 | **post-edit 슬롯** (사용자 프로젝트별 린터/포맷) |
 | `Stop` | AI 응답 종료 시 | **freshness** (docs/ 수정 시 Last Updated 자동 갱신) |
@@ -25,7 +25,8 @@ Hook 이란 Claude Code 내부의 특정 이벤트(사용자 프롬프트 제출
 
 | 파일 | 이벤트 | 역할 | 상태 |
 |---|---|---|---|
-| `freshness.js` | `Stop` | 이번 응답에서 수정된 `docs/*.md`, `CLAUDE.md` 의 `Last Updated` 를 오늘 날짜로 자동 갱신 | Phase 2-3 에서 활성화 |
+| `freshness.js` | `Stop` | 이번 응답에서 수정된 `docs/*.md`, `CLAUDE.md` 의 `Last Updated` 를 오늘 날짜로 자동 갱신 | 등록됨 |
+| `auto-skill.js` | `UserPromptSubmit` | `skill-rules.json` 키워드 매칭 + 스킬 frontmatter 자동 스캔으로 힌트 주입. 보안·cleanup 주기 초과 시 경고 | 등록됨 |
 | `post-edit.example.js` | `PostToolUse` | (예시) Edit/Write 후 원하는 린터/포맷 실행. **실사용 시 복사해서 프로젝트에 맞게 커스터마이즈** | 예시 파일 (미등록) |
 
 ---

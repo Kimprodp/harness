@@ -3,25 +3,26 @@
 > harness 프로젝트의 Step별 진행 로그 + 주요 결정 기록.
 > 신규 세션 진입 또는 대화 압축 후 현재 상태 복구용.
 
-**Last Updated**: 2026-04-19
+**Last Updated**: 2026-09-08
 
 ---
 
 ## 📊 현재 상태
 
-**Phase 3 구현 완료**. 하니스 기본 기능 세트 + 자동화 (Playwright / 보안 주기 상기 / 설치 스크립트) 완성.
+**Phase 3.5 구현 완료**. 하니스 기본 기능 세트 + 자동화 (Playwright / 보안 주기 상기 / 설치 스크립트) + 결정 기록·기술 부채·시안 탐색 커맨드 완성.
 
 ### 핵심 산출물 (전체 누적)
 - **에이전트 3개**: `@plan-reviewer`, `@reviewer`, `@security`
 - **스킬 6개**: `idea-validation`, `product-spec`, `scope-review`, `tech-stack-decision`, `tech-spec`, `design-slop-patterns`
-- **커맨드 12개**: `/kickoff`, `/feature-start`, `/feature-plan`, `/task`, `/code-review`, `/project-status`, `/update-docs`, `/investigate`, `/qa`, `/design-review`, `/security-audit`, `/ship`
+- **커맨드 15개**: `/kickoff`, `/feature-start`, `/feature-plan`, `/task`, `/code-review`, `/project-status`, `/update-docs`, `/investigate`, `/qa`, `/design-review`, `/design-shotgun`, `/security-audit`, `/decision`, `/cleanup`, `/ship`
 - **Hook 2개 + 스캐폴딩**: `freshness.js` (Stop), `auto-skill.js` (UserPromptSubmit), `post-edit.example.js` (PostToolUse, 빈 슬롯)
 - **스크립트 9개**: `_shared` 3종, `qa/runner.js`, `design-review` 3종 (capture/dom-check/mockup-gen), `ship` 2종 (bump-version/changelog-gen)
 - **설치 스크립트**: `install.sh`, `install.ps1` (cross-platform)
 - **템플릿 6개**: 하이브리드 구조 (plan/context/tasks + feature prd/tech-spec)
 
 ### 남은 작업 (백로그)
-- [ ] **Step 7**: `README.md` (GitHub용) + `docs/story.md` (포트폴리오용)
+- [ ] **Phase 4 개편** — 현업 제품 개발용으로 구조 확장. 아래 Phase 4 표 참조
+- [ ] `README.md` (GitHub용) + `docs/story.md` (포트폴리오용)
 - [ ] 실전 하니스 설치 + Dry Run 검증 (실제 새 프로젝트에서)
 
 ---
@@ -72,11 +73,65 @@
 | 3-6 | `install.sh` + `install.ps1` — cross-platform 설치 스크립트 (기존 .claude 백업 → 복사 → .gitignore 업데이트 → npm install → Playwright 선택 설치) | 2026-04-20 |
 | 3-7 | 이 문서 + `CLAUDE.md` Phase 3 완료 반영 | 2026-04-20 |
 
-### Phase 4 (먼 미래)
+### Phase 3.5 (결정 기록 + 정리 + 시안 탐색)
+
+| Step | 내용 | 날짜 |
+|---|---|---|
+| 3.5-A | `/decision` — 결정 1건을 대화형 8개 질문으로 구조화해 `context.md` ADR 에 실시간 append. `/update-docs` 와 분업 (단건 실시간 vs 회고형 일괄) | 2026-04-20 |
+| 3.5-B | `/design-shotgun` — 같은 주제에 스타일 다른 시안 3~5개 동시 렌더 + grid 비교. `shotgun-gen.js` 추가 | 2026-04-20 |
+| 3.5-C | `/cleanup` — 오래된 TODO / 참조 없는 파일 / 큰 파일 / 빈 폴더 탐지. `detect.js` + `state/cleanup.json` 주기 기록. `/ship` 과 `/project-status` 에 연동 | 2026-04-20 |
+| 3.5-D | `auto-skill` Hook 에 스킬 frontmatter 자동 스캔 추가 (수동 규칙 없는 스킬도 힌트 주입) | 2026-04-20 |
+
+### Phase 3.6 (표준 템플릿 v2)
+
+| Step | 내용 | 날짜 |
+|---|---|---|
+| 3.6-1 | 3축 문서 템플릿에 안정성·압축 원칙 명시 (plan=안정 비전 / context=결정 이유 / tasks=진행 인덱스) | 2026-04-21 |
+| 3.6-2 | 커맨드에 단계 단위 커밋 + 완료 기능 압축 패턴 규칙 추가 | 2026-04-21 |
+| 3.6-3 | `@plan-reviewer` 에 표준 v2 검증 룰 추가 (문서 자리 침범 검출) | 2026-04-21 |
+| 3.6-4 | `settings.json` `$schema` 교체 + 잘못된 `_comment` 키 제거 | 2026-04-21 |
+
+### Phase 3.7 (환경 대응)
+
+| Step | 내용 | 날짜 |
+|---|---|---|
+| 3.7-1 | `install.ps1` 을 UTF-8 with BOM 으로 저장. BOM 이 없으면 Windows PowerShell 5.1 이 한글을 ANSI 로 읽어 파싱이 깨졌다 | 2026-09-08 |
+| 3.7-2 | `ship.md` 의 Phase 2-6 / 2-7 순서 정정, Hook 문서 상태 갱신, 커맨드 개수 12 → 15 반영 | 2026-09-08 |
+
+### Phase 4 (현업 제품 개발용 개편 — 진행 중)
+
+개인 프로젝트 전용이던 구조를 회사 제품 개발에도 쓰이도록 넓힌다.
+목표 구조는 [spec.md](spec.md) 가 정본이고, 이 표는 거기 도달하기 위한 작업 목록이다.
+
+**개편 배경** — 시작점이 새 아이디어 인터뷰 하나뿐이라 기획이 끝난 프로젝트를 받을 수 없었고, 브랜치와 CI 와 마이그레이션이 흐름에 없었으며, 시스템 전체를 설계하는 자리가 비어 있었다. 기능 정의와 화면 정의도 PRD 안에 뭉뚱그려져 있었다.
+
+| Step | 내용 | 상태 |
+|---|---|---|
+| 4-0 | `docs/spec.md` 설계 정본 작성 + 이 작업 계획 | ✅ 2026-09-08 |
+| 4-1 | 공통 규칙을 `CLAUDE.md.template` 으로 추출. 커맨드에는 고유 규칙만 남김 | |
+| 4-2 | `system-architecture` 스킬 신규 (요구 수집 → 데이터 모델 → 기술 선택 → 시스템 구조). `tech-stack-decision` 을 Step 3 로 흡수 | |
+| 4-3 | 템플릿 신규: `architecture`, `data-model`, `milestones`. `context-template` 에 `[architecture]` `[milestone: X]` 태그 추가 | |
+| 4-4 | `/kickoff` 분기 — 새 아이디어 / 기존 기획. 합류 후 `system-architecture` 호출. CI 설정 확인 | |
+| 4-5 | 템플릿 신규: `functional-spec`, `screens`. `feature-prd-template` 에서 겹치는 부분 정리 | |
+| 4-6 | `/feature-start` 에 범위 분기 (백엔드/프론트/양쪽) 와 크기 게이트 추가 | |
+| 4-7 | `/feature-plan` 마지막에 `feature/<이름>` 브랜치 생성 추가 | |
+| 4-8 | `/task` 분해 → `/done` 신규. 완료 처리·커밋·아카이브를 분리 | |
+| 4-9 | `/qa` 에 API 모드 추가. runner 에 HTTP 호출과 응답 검증 action | |
+| 4-10 | `/ship` 에 CI 결과 확인 분기, 스키마 변경 감지와 롤백 계획 검사 | |
+| 4-11 | `/perf` 신규 — 부하와 응답 시간 측정, 기준선 저장과 비교 | |
+| 4-12 | `@reviewer` 에 관측 준비 체크리스트 추가 (로그 위치, 에러 삼킴, 응답 시간 기록) | |
+| 4-13 | `/compile-spec` 신규 — `spec-index.md`, `screens-index.md`, `README.md` 생성 | |
+| 4-14 | `/design-shotgun` 을 `/design-review` 모드로 흡수 | |
+| 4-15 | `freshness.js` 제거. 문서 신선도를 git 커밋 시각 기준으로 판정하도록 `/project-status` 수정 | |
+| 4-16 | `auto-skill` 키워드에서 흔한 단어 제거. 커맨드 변경 반영 | |
+| 4-17 | `/project-status` 에 마일스톤 진행 섹션 추가 | |
+| 4-18 | `CLAUDE.md` 와 이 문서 갱신, 저장소 `README.md` 작성 | |
+
+### Phase 5 (먼 미래)
 
 - 생활 자동화 (Gmail / Calendar 연동 — Karpathy 스타일 LLM 위키)
 - Mac Mini 상주 + Telegram Bot 연동
-- README / story 공개용 작성 (Step 7 잔여)
+- `docs/story.md` 포트폴리오용 상세 작성
 
 ---
 

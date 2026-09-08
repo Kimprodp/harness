@@ -10,8 +10,8 @@
 
 - **이름**: harness (개인용 범용 Claude Code 하니스)
 - **소유자**: Kim Gyutae
-- **경로**: `C:\Users\Kimgyutae\harness`
-- **GitHub**: Private 레포
+- **경로**: `C:\Users\kiimw\Desktop\tools\harness`
+- **GitHub**: [Kimprodp/harness](https://github.com/Kimprodp/harness) (공개)
 - **라이선스**: MIT
 - **용도**: 새 프로젝트마다 `.claude/` 폴더를 복사해서 사용 (Phase 1에선 단순 복사 방식)
 
@@ -45,17 +45,19 @@
 
 ```
 ┌───────────────────────────────────────────────┐
-│  L6. 부트스트랩   → /kickoff, /feature-start   │
-│                    /feature-plan, /task,       │
-│                    /code-review, /update-docs, │
-│                    /project-status             │
+│  L6. 부트스트랩   → /kickoff (신규 프로덕트),  │
+│                    /feature-start, /feature-   │
+│                    plan, /task 로 이어지는     │
+│                    기본 개발 흐름              │
 ├───────────────────────────────────────────────┤
 │  L5. 문서 템플릿  → plan/context/tasks + PRD/  │
 │                    tech-spec + CLAUDE.md       │
 ├───────────────────────────────────────────────┤
-│  L4. Hook        → (Phase 2)                   │
+│  L4. Hook        → freshness (Stop),           │
+│                    auto-skill (UserPrompt-     │
+│                    Submit), post-edit 슬롯     │
 ├───────────────────────────────────────────────┤
-│  L3. 커맨드      → 사용자 진입점 (위 7개)      │
+│  L3. 커맨드      → 사용자 진입점 (15개)        │
 ├───────────────────────────────────────────────┤
 │  L2. 에이전트    → plan-reviewer, reviewer,    │
 │                    security (배치 실행)         │
@@ -86,7 +88,7 @@ harness/
 
 ---
 
-## 📊 현재 상태 (Phase 3 구현 완료)
+## 📊 현재 상태 (Phase 3.5 구현 완료)
 
 **상세 진행 이력은 [docs/progress.md](docs/progress.md) 참조**
 
@@ -94,7 +96,11 @@ harness/
 
 - **에이전트 3개**: `@plan-reviewer`, `@reviewer`, `@security`
 - **스킬 6개**: `idea-validation`, `product-spec`, `scope-review`, `tech-stack-decision`, `tech-spec`, `design-slop-patterns`
-- **커맨드 12개**: `/kickoff`, `/feature-start`, `/feature-plan`, `/task`, `/code-review`, `/project-status`, `/update-docs`, `/investigate`, `/qa`, `/design-review`, `/security-audit`, `/ship`
+- **커맨드 15개**
+  - 기획·구현: `/kickoff`, `/feature-start`, `/feature-plan`, `/task`
+  - 검토: `/code-review`, `/investigate`, `/qa`, `/design-review`, `/design-shotgun`, `/security-audit`
+  - 기록·정리: `/update-docs`, `/decision`, `/cleanup`, `/project-status`
+  - 릴리스: `/ship`
 - **Hook**: `freshness.js` (Stop, 문서 Last Updated 자동 갱신) + `auto-skill.js` (UserPromptSubmit, 힌트 주입 + 보안 주기 체크) + `post-edit.example.js` (사용자 커스텀 슬롯)
 - **스크립트**: `_shared` 3종 (ensure-playwright/check-dev-server/version-check) + `qa/runner.js` + `design-review` 3종 + `ship` 2종
 - **템플릿 6개**: 하이브리드 구조
